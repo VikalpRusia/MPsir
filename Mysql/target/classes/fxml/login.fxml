@@ -8,6 +8,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 
 
+<?import javafx.scene.control.PasswordField?>
 <DialogPane fx:id="dialogPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controller.DialogController">
    <header>
@@ -27,7 +28,7 @@
            <Label text="Username"/>
            <Label text="Password" GridPane.rowIndex="1"/>
            <TextField fx:id="username" GridPane.columnIndex="1"/>
-           <TextField fx:id="password" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+           <PasswordField fx:id="password" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
        </GridPane>
    </content>
 </DialogPane>

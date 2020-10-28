@@ -56,7 +56,7 @@ public class Main extends Application {
     }
     public void display(Stage primaryStage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/sample.fxml"));
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("MYSQL WORKBENCH");
         primaryStage.setScene(new Scene(loader.load()));
         Controller controller = loader.getController();
         controller.initData(database);
