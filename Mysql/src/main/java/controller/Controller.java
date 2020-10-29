@@ -99,6 +99,13 @@ public class Controller {
         contextMenu_Data_Table.getItems().addAll(addTable, deleteTable);
 
         MenuItem addTableEmpty = new MenuItem("Add table");
+        addTableEmpty.setOnAction(tr ->{
+            try {
+                inputTable();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
         contextMenuTable.getItems().addAll(addTableEmpty);
 
         //table row Context
@@ -265,11 +272,21 @@ public class Controller {
     public void inputTable() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/createTable.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
-        CreateTableController controller = loader.getController();
         dialog.setDialogPane(loader.load());
+        CreateTableController controller = loader.getController();
         Optional<ButtonType> result =dialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK){
-
+            try {
+                database.createTable(
+                        controller.getTableName(),
+                        controller.getColumnsName(),
+                        controller.getColumnsType()
+                );
+                tableList.add(controller.getTableName());
+                tableView.getSelectionModel().select(0);
+            } catch (SQLException e){
+                alertShow(e);
+            }
         }
 
     }

@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
+import java.util.List;
 
 public class Database implements AutoCloseable {
     private final Connection conn;
@@ -78,14 +79,14 @@ public class Database implements AutoCloseable {
     }
 
     public void createTable(String tableName,
-                            String[] name,String[] datatype) throws SQLException {
+                            List<String> name, List<String> datatype) throws SQLException {
         Statement cursor = conn.createStatement();
 //        create table sampling(id int);
         StringBuilder s = new StringBuilder("CREATE TABLE " + tableName + " (");
-        for (int i=0;i< name.length;i++){
-            s.append(name[i])
+        for (int i=0;i< name.size();i++){
+            s.append(name.get(i))
                     .append(" ")
-                    .append(datatype[i]);
+                    .append(datatype.get(i));
         }
         s.append(")");
         System.out.println(s.toString());
