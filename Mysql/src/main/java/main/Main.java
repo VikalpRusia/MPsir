@@ -1,6 +1,7 @@
 package main;
 
-import controller.*;
+import controller.Controller;
+import controller.DialogController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;

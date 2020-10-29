@@ -1,26 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<DialogPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.createTableController">
-    <header>
-        <GridPane>
-            <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            </rowConstraints>
-            <children>
-                <Label text="Label" />
-            </children>
-        </GridPane>
-    </header>
+<DialogPane fx:id="dialogPane" stylesheets="@../css/createTable.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.CreateTableController">
+    <content>
+        <VBox prefHeight="327.0" prefWidth="316.0">
+            <HBox prefWidth="200.0">
+                <GridPane hgap="15.0" HBox.hgrow="ALWAYS">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                    <Label text="Table:" />
+                    <TextField promptText="table_name" GridPane.rowIndex="1" />
+                    <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <Label text="Comment:" GridPane.columnIndex="1" />
+                </GridPane>
+            </HBox>
+            <HBox prefWidth="200.0">
+                <VBox.margin>
+                    <Insets top="10.0" />
+                </VBox.margin>
+                <Label text="Columns:" />
+            </HBox>
+            <HBox prefWidth="200.0">
+                <GridPane fx:id="columnGridPane" minHeight="200" HBox.hgrow="ALWAYS">
+                </GridPane>
+                <VBox fx:id="imagesContainer" spacing="5.0">
+                    <ImageView fitHeight="20.0" fitWidth="20.0" onMouseClicked="#addImageClick" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@../image/addition.png" />
+                    </ImageView>
+                    <ImageView fitHeight="20.0" fitWidth="20.0" onMouseClicked="#minusImageClick" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@../image/minus.png" />
+                    </ImageView>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+                </VBox>
+            </HBox>
+        </VBox>
+    </content>
 </DialogPane>

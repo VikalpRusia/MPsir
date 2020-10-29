@@ -11,11 +11,16 @@ import model.Database;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.SQLOutput;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Considered normal database i.e. it is basic not customisable.
+ * Refer point 1 in addDatabase method
+ */
 public class Controller {
 
     Database database;
@@ -252,7 +257,8 @@ public class Controller {
             Pattern pattern = Pattern.compile("^(.*?);*$");
             Matcher matcher = pattern.matcher(x);
             while (matcher.find()) {
-                databaseList.addAll(matcher.group(1));
+                //1
+                databaseList.addAll(matcher.group(1).toLowerCase());
             }
         }
     }
@@ -260,8 +266,12 @@ public class Controller {
     public void inputTable() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/createTable.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
+        CreateTableController controller = loader.getController();
         dialog.setDialogPane(loader.load());
-        dialog.showAndWait();
+        Optional<ButtonType> result =dialog.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK){
+
+        }
 
     }
 }
