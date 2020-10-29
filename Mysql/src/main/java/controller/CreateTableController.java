@@ -3,9 +3,8 @@ package controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 
 public class CreateTableController {
 
@@ -29,5 +28,10 @@ public class CreateTableController {
 
     @FXML
     public void minusImageClick() {
+    }
+
+    @FXML
+    public void addImageHover(){
+
     }
 }

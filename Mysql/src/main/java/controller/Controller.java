@@ -11,7 +11,6 @@ import model.Database;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.SQLOutput;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
