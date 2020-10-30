@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import model.Database;
 
@@ -199,6 +200,7 @@ public class Controller {
                         return new SimpleStringProperty(
                                 d.toString());
                     });
+            tableColumn.setCellFactory(updateItem());
             dataView.getColumns().add(tableColumn);
         }
         dataView.setItems(columnsList.getColumn());
@@ -299,5 +301,28 @@ public class Controller {
             }
         }
 
+    }
+    private Callback<TableColumn<ObservableList<Object>, String>, TableCell<ObservableList<Object>, String>> updateItem() {
+        return new Callback<>() {
+            @Override
+            public TableCell<ObservableList<Object>, String> call(TableColumn<ObservableList<Object>, String> observableListStringTableColumn) {
+                return new TableCell<>(){
+                    @Override
+                    protected void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(empty){
+                            setText(null);
+                        }
+                        else if (item==null){
+                            setText("<Null>");
+                            setTextFill(Color.PURPLE);
+                        } else {
+                            setText(item);
+                            setTextFill(Color.BLACK);
+                        }
+                    }
+                };
+            }
+        };
     }
 }

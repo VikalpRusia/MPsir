@@ -110,6 +110,12 @@ public class Database implements AutoCloseable {
         cursor.close();
 
     }
+    public void insertIntoTable(String tableName,
+                                String[] columnName, String[] columnType,
+                                String[] columnData
+    ){
+
+    }
 
 
     @Override
