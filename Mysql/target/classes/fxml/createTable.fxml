@@ -43,13 +43,15 @@
             <HBox>
                 <VBox id="mainContainerColumn" HBox.hgrow="ALWAYS">
                     <HBox minHeight="200">
-                        <TableView fx:id="mainTableView" prefHeight="200.0" prefWidth="200.0">
+                        <TableView fx:id="mainTableView" prefHeight="300.0" prefWidth="300.0">
                             <columns>
-                                <TableColumn fx:id="columnNameColumn" minWidth="100.0" prefWidth="100.0"
-                                             maxWidth="100.0"
+                                <TableColumn fx:id="columnNameColumn" minWidth="150.0" prefWidth="150.0"
+                                             maxWidth="150.0"
                                              text="Column Name"/>
-                                <TableColumn fx:id="columnTypeColumn" minWidth="100.0" prefWidth="100.0"
-                                             maxWidth="100.0" text="Type"/>
+                                <TableColumn fx:id="columnTypeColumn" minWidth="50.0" prefWidth="50.0"
+                                             maxWidth="50.0" text="Type"/>
+                                <TableColumn fx:id="primaryKey" minWidth="100.0" prefWidth="100.0"
+                                             maxWidth="100.0" text="Primary Key"/>
                             </columns>
                             <columnResizePolicy>
                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>

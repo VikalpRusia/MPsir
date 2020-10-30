@@ -280,7 +280,8 @@ public class Controller {
                 database.createTable(
                         controller.getTableName(),
                         controller.getColumnsName(),
-                        controller.getColumnsType()
+                        controller.getColumnsType(),
+                        controller.getPrimaryKeys()
                 );
                 tableList.add(controller.getTableName());
                 tableView.getSelectionModel().select(0);

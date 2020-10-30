@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
+<?import java.lang.Boolean?>
 <DialogPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controller.AddColumnController" fx:id="dialogPane">
     <content>
@@ -36,6 +37,20 @@
                         <String fx:value="char"/>
                     </FXCollections>
                 </items>
+            </ComboBox>
+            <Label text="IS Primary Key ?" GridPane.rowIndex="2"/>
+            <ComboBox fx:id="primaryKey" prefWidth="150.0" GridPane.columnIndex="1"
+                      GridPane.rowIndex="2">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <Boolean fx:value="true"/>
+                        <Boolean fx:value="false"/>
+                    </FXCollections>
+
+                </items>
+                <value>
+                    <Boolean fx:value="false" />
+                </value>
             </ComboBox>
         </GridPane>
     </content>

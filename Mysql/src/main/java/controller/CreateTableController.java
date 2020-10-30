@@ -21,6 +21,9 @@ public class CreateTableController {
     private TextField tableName;
 
     @FXML
+    private TableColumn<AddColumnInTable, String> primaryKey;
+
+    @FXML
     private TableColumn<AddColumnInTable, String> columnNameColumn;
 
     @FXML
@@ -51,6 +54,7 @@ public class CreateTableController {
 
         columnNameColumn.setCellValueFactory(s -> new SimpleStringProperty(s.getValue().getColumnName()));
         columnTypeColumn.setCellValueFactory(s -> new SimpleStringProperty(s.getValue().getColumnType()));
+        primaryKey.setCellValueFactory(s -> new SimpleStringProperty(s.getValue().isPrimaryKey().toString()));
         mainTableView.setItems(tableViewData);
 
     }
@@ -65,6 +69,7 @@ public class CreateTableController {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             String name = controller.getColumnName();
             String type = controller.getColumnType();
+            boolean isPrimary = controller.getPrimaryKey();
             if (name.equals("") || type.equals("")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText("All Fields were necessary");
@@ -72,7 +77,7 @@ public class CreateTableController {
                 alert.showAndWait();
                 return;
             }
-            tableViewData.add(new AddColumnInTable(name, type));
+            tableViewData.add(new AddColumnInTable(name, type, isPrimary));
             mainTableView.getSelectionModel().select(0);
         }
     }
@@ -102,13 +107,23 @@ public class CreateTableController {
         return tableViewData.stream().map(AddColumnInTable::getColumnType).collect(Collectors.toList());
     }
 
+    public List<String> getPrimaryKeys() {
+        return tableViewData
+                .stream()
+                .filter(AddColumnInTable::isPrimaryKey)
+                .map(AddColumnInTable::getColumnName)
+                .collect(Collectors.toList());
+    }
+
     public static class AddColumnInTable {
         private String columnName;
         private String columnType;
+        private Boolean primaryKey;
 
-        public AddColumnInTable(String columnName, String columnType) {
+        public AddColumnInTable(String columnName, String columnType, boolean primaryKey) {
             this.columnName = columnName;
             this.columnType = columnType;
+            this.primaryKey = primaryKey;
         }
 
         public String getColumnName() {
@@ -117,6 +132,10 @@ public class CreateTableController {
 
         public String getColumnType() {
             return columnType;
+        }
+
+        public Boolean isPrimaryKey() {
+            return primaryKey;
         }
     }
 }

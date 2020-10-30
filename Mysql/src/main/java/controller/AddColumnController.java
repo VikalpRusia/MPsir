@@ -9,6 +9,9 @@ import javafx.scene.control.TextField;
 public class AddColumnController {
 
     @FXML
+    private ComboBox<Boolean> primaryKey;
+
+    @FXML
     private DialogPane dialogPane;
 
     @FXML
@@ -28,5 +31,8 @@ public class AddColumnController {
     }
     public String getColumnType(){
         return columnType.getValue();
+    }
+    public Boolean getPrimaryKey(){
+        return primaryKey.getValue();
     }
 }
