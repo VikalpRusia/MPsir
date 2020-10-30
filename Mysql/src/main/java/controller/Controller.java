@@ -127,10 +127,9 @@ public class Controller {
         contextMenuDataRow = new ContextMenu();
         MenuItem add_row_Empty = new MenuItem("Add row");
 //        add_row_Empty.setOnAction(e -> inputDataInTable());
-        MenuItem edit_row = new MenuItem("Edit row");
         MenuItem delete_row = new MenuItem("Delete row");
         delete_row.setOnAction(s -> deleteData());
-        contextMenuDataRow.getItems().addAll(add_row_Empty, edit_row, delete_row);
+        contextMenuDataRow.getItems().addAll(add_row_Empty, delete_row);
 
         databaseView.getSelectionModel().selectedItemProperty().addListener((observableValue, s, t1) -> {
             if (t1 != null) {
@@ -212,12 +211,7 @@ public class Controller {
                                 d.toString());
                     });
             tableColumn.setCellFactory(updateItem());
-//            tableColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<ObservableList<Object>, String>>() {
-//                @Override
-//                public void handle(TableColumn.CellEditEvent<ObservableList<Object>, String> t) {
-//
-//                }
-//            });
+            tableColumn.setOnEditCommit(t -> updateData(t.getNewValue(),t.getTableColumn().getText()));
             dataView.getColumns().add(tableColumn);
         }
         dataView.setItems(columnsList.getColumn());
@@ -390,21 +384,36 @@ public class Controller {
     }
     public void deleteData(){
         try {
-            List<Integer> primaryKeyColumns = database.positionPrimaryKey(
-                    tableView.getSelectionModel().getSelectedItem()
-            );
-            List<String> values = new ArrayList<>();
-            for (Integer key:primaryKeyColumns) {
-                values.add(
-                        dataView.getSelectionModel().getSelectedItem().get(key-1).toString()
-                );
-            }
-            System.out.println(values);
+            List<String> values = primaryKeyValues();
             database.deleteData(tableView.getSelectionModel().getSelectedItem(),values);
             columnsList.getColumn().remove(dataView.getSelectionModel().getSelectedItem());
         } catch (SQLException e){
             alertShow(e);
         }
 
+    }
+
+    public void updateData(String newValue,String columnModified) {
+        try {
+            List<String> values = primaryKeyValues();
+            database.updateData(tableView.getSelectionModel().getSelectedItem(),
+                    columnModified,newValue,values);
+
+        } catch (SQLException e) {
+            alertShow(e);
+        }
+    }
+    private List<String> primaryKeyValues() throws SQLException {
+        List<Integer> primaryKeyColumns = database.positionPrimaryKey(
+                tableView.getSelectionModel().getSelectedItem()
+        );
+        List<String> values = new ArrayList<>();
+        for (Integer key:primaryKeyColumns) {
+            values.add(
+                    dataView.getSelectionModel().getSelectedItem().get(key-1).toString()
+            );
+        }
+        System.out.println(values);
+        return values;
     }
 }

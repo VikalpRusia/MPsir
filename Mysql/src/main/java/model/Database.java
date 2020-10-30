@@ -186,23 +186,44 @@ public class Database implements AutoCloseable {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
                 .append("DELETE FROM ")
+                .append(tableName);
+        wherePrimaryKey(stringBuilder,tableName,value);
+
+    }
+
+    public void updateData(String tableName,
+                           String columnModified, String newValue,
+                           List<String> value) throws SQLException {
+//        update c set id=1 where id='2';
+        StringBuilder sb = new StringBuilder();
+        sb.append("UPDATE ")
                 .append(tableName)
-                .append(" WHERE");
+                .append(" SET ")
+                .append(columnModified)
+                .append(" = ")
+                .append("'")
+                .append(newValue)
+                .append("'");
+        wherePrimaryKey(sb,tableName,value);
+    }
+    private void wherePrimaryKey(StringBuilder sb, String tableName,List<String> value) throws SQLException {
+        sb.append(" WHERE");
         List<String> strings = primaryKey(tableName);
         for (int i = 0; i < strings.size(); i++) {
-            stringBuilder.append(" ")
+            sb.append(" ")
                     .append(strings.get(i))
                     .append(" = ?");
-            if (i<strings.size()-1){
-                stringBuilder.append(" AND");
+            if (i < strings.size() - 1) {
+                sb.append(" AND");
             }
         }
-        PreparedStatement preparedStatement = conn.prepareStatement(stringBuilder.toString());
-        for (int i = 1; i <=value.size() ; i++) {
-            preparedStatement.setString(i,value.get(i-1));
+        PreparedStatement preparedStatement = conn.prepareStatement(sb.toString());
+        for (int i = 1; i <= value.size(); i++) {
+            preparedStatement.setString(i, value.get(i - 1));
         }
         System.out.println(preparedStatement.toString());
         preparedStatement.executeUpdate();
+        preparedStatement.close();
     }
 
     public static class Column {
