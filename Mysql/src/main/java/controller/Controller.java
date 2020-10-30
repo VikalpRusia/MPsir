@@ -6,12 +6,17 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import model.Database;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -43,6 +48,7 @@ public class Controller {
     private TableView<ObservableList<Object>> dataView;
 
     public void initialize() {
+        dataView.setEditable(true);
         contextMenu_Data_Database = new ContextMenu();
         contextMenuDatabase = new ContextMenu();
         MenuItem addDatabase = new MenuItem("Add database");
@@ -97,7 +103,9 @@ public class Controller {
             };
             deletionHandling(tableView, consumer);
         });
-        contextMenu_Data_Table.getItems().addAll(addTable, deleteTable);
+        MenuItem primaryKey = new MenuItem("Primary Key");
+        primaryKey.setOnAction(s -> getPrimaryKey());
+        contextMenu_Data_Table.getItems().addAll(addTable, deleteTable,primaryKey);
 
         MenuItem addTableEmpty = new MenuItem("Add table");
         addTableEmpty.setOnAction(tr -> {
@@ -112,13 +120,16 @@ public class Controller {
         //table row Context
         contextMenuRow = new ContextMenu();
         MenuItem add_row = new MenuItem("Add row");
+//        add_row.setOnAction(e -> inputDataInTable());
         contextMenuRow.getItems().addAll(add_row);
 
         //table data context
         contextMenuDataRow = new ContextMenu();
         MenuItem add_row_Empty = new MenuItem("Add row");
+//        add_row_Empty.setOnAction(e -> inputDataInTable());
         MenuItem edit_row = new MenuItem("Edit row");
         MenuItem delete_row = new MenuItem("Delete row");
+        delete_row.setOnAction(s -> deleteData());
         contextMenuDataRow.getItems().addAll(add_row_Empty, edit_row, delete_row);
 
         databaseView.getSelectionModel().selectedItemProperty().addListener((observableValue, s, t1) -> {
@@ -201,6 +212,12 @@ public class Controller {
                                 d.toString());
                     });
             tableColumn.setCellFactory(updateItem());
+//            tableColumn.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<ObservableList<Object>, String>>() {
+//                @Override
+//                public void handle(TableColumn.CellEditEvent<ObservableList<Object>, String> t) {
+//
+//                }
+//            });
             dataView.getColumns().add(tableColumn);
         }
         dataView.setItems(columnsList.getColumn());
@@ -268,6 +285,7 @@ public class Controller {
                 //1
                 databaseList.addAll(matcher.group(1).toLowerCase());
             }
+            dataView.setItems(null);
         }
     }
 
@@ -306,23 +324,88 @@ public class Controller {
         return new Callback<>() {
             @Override
             public TableCell<ObservableList<Object>, String> call(TableColumn<ObservableList<Object>, String> observableListStringTableColumn) {
-                return new TableCell<>(){
+                StringConverter<String> stringConverter = new StringConverter<>() {
                     @Override
-                    protected void updateItem(String item, boolean empty) {
+                    public String toString(String s) {
+                        return s;
+                    }
+
+                    @Override
+                    public String fromString(String s) {
+                        return s;
+                    }
+                };
+                return new TextFieldTableCell<>(stringConverter){
+                    @Override
+                    public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
+                        setFont(Font.font(15));
                         if(empty){
                             setText(null);
+                            setEditable(false);
                         }
                         else if (item==null){
                             setText("<Null>");
                             setTextFill(Color.PURPLE);
+                            setEditable(true);
                         } else {
                             setText(item);
                             setTextFill(Color.BLACK);
+                            setEditable(true);
                         }
                     }
                 };
             }
         };
+    }
+
+
+//    public void inputDataInTable() {
+//        try {
+//            database.insertIntoTable("vikalp",
+//                    Arrays.asList("id", "rool"),
+//                    Arrays.asList("int", "double"),
+//                    Arrays.asList("23", "pop")
+//            );
+//        }catch (SQLException e){
+//            alertShow(e);
+//        }
+//    }
+//    public void save(){
+//
+//    }
+    public void getPrimaryKey() {
+        String tableName = tableView.getSelectionModel().getSelectedItem();
+        try {
+            List<String> keys = database.primaryKey(tableName);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            StringBuilder s = new StringBuilder();
+            keys.forEach(s1 -> s.append(s1).append("\n"));
+            alert.setHeaderText("Primary keys are !");
+            alert.setContentText(s.toString());
+            alert.showAndWait();
+        } catch (SQLException e){
+            alertShow(e);
+        }
+    }
+    public void deleteData(){
+        try {
+            List<Integer> primaryKeyColumns = database.positionPrimaryKey(
+                    tableView.getSelectionModel().getSelectedItem()
+            );
+            List<String> values = new ArrayList<>();
+            for (Integer key:primaryKeyColumns) {
+                values.add(
+                        dataView.getSelectionModel().getSelectedItem().get(key-1).toString()
+                );
+            }
+            System.out.println(values);
+            database.deleteData(tableView.getSelectionModel().getSelectedItem(),values);
+            tableList.remove(tableView.getSelectionModel().getSelectedItem());
+
+        } catch (SQLException e){
+            alertShow(e);
+        }
+
     }
 }

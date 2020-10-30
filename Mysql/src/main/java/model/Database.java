@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Database implements AutoCloseable {
@@ -110,17 +111,98 @@ public class Database implements AutoCloseable {
         cursor.close();
 
     }
-    public void insertIntoTable(String tableName,
-                                String[] columnName, String[] columnType,
-                                String[] columnData
-    ){
 
-    }
+//    public void insertIntoTable(String tableName,
+//                                List<String> columnName, List<String> columnType,
+//                                List<String> columnData
+//    ) throws SQLException {
+////        INSERT INTO table_name1 ( column_1 ) values('viak');
+//        StringBuilder sb = new StringBuilder("INSERT INTO ");
+//        sb.append(tableName)
+//                .append(" (");
+//        for (int i = 0; i < columnName.size(); i++) {
+//            sb.append(" ")
+//                    .append(columnName.get(i));
+//            if (i < columnName.size() - 1) {
+//                sb.append(",");
+//            }
+//        }
+//        sb.append(") ")
+//                .append("VALUES (");
+//        for (int i = 0; i < columnData.size(); i++) {
+//            sb.append(" ");
+//            if (columnType.get(i).matches("^int")) {
+//                sb.append(columnData.get(i));
+//            } else if (columnType.get(i).matches("^double")) {
+//                sb.append(columnData.get(i));
+//            } else if (columnType.get(i).matches("^char\\(\\s*\\d+\\s*\\)$")) {
+//                sb.append("'")
+//                        .append(columnData.get(i))
+//                        .append("'");
+//            } else if (columnType.get(i).matches("^varchar\\(\\s*\\d+\\s*\\)$")) {
+//                sb.append("'")
+//                        .append(columnData.get(i))
+//                        .append("'");
+//            }
+//            if (i < columnData.size() - 1) {
+//                sb.append(",");
+//            }
+//        }
+//        sb.append(")");
+//        System.out.println(sb.toString());
+////        Statement cursor = conn.createStatement();
+////        cursor.execute(sb.toString());
+////        cursor.close();
+//    }
 
 
     @Override
     public void close() throws SQLException {
         conn.close();
+    }
+
+    public List<String> primaryKey(String tableName) throws SQLException {
+        Statement statement = conn.createStatement();
+        ResultSet resultSet = statement.executeQuery("SHOW KEYS FROM " + tableName + " WHERE Key_name = 'PRIMARY'");
+        List<String> keys = new ArrayList<>();
+        while (resultSet.next()) {
+            keys.add(resultSet.getString(5));
+        }
+        return keys;
+    }
+
+    public List<Integer> positionPrimaryKey(String tableName) throws SQLException {
+        Statement statement = conn.createStatement();
+        ResultSet resultSet = statement.executeQuery("SHOW KEYS FROM " + tableName + " WHERE Key_name = 'PRIMARY'");
+        List<Integer> keys = new ArrayList<>();
+        while (resultSet.next()) {
+            keys.add(resultSet.getInt(4));
+        }
+        return keys;
+    }
+
+    public void deleteData(String tableName, List<String> value) throws SQLException {
+//        delete from s where id='90';
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+                .append("DELETE FROM ")
+                .append(tableName)
+                .append(" WHERE");
+        List<String> strings = primaryKey(tableName);
+        for (int i = 0; i < strings.size(); i++) {
+            stringBuilder.append(" ")
+                    .append(strings.get(i))
+                    .append(" = ?");
+            if (i<strings.size()-1){
+                stringBuilder.append(" AND");
+            }
+        }
+        PreparedStatement preparedStatement = conn.prepareStatement(stringBuilder.toString());
+        for (int i = 1; i <=value.size() ; i++) {
+            preparedStatement.setString(i,value.get(i-1));
+        }
+        System.out.println(preparedStatement.toString());
+        preparedStatement.executeUpdate();
     }
 
     public static class Column {

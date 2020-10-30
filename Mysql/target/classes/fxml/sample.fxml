@@ -10,13 +10,14 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
+<BorderPane stylesheets="@../css/sample.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <Menu mnemonicParsing="false" text="File">
-                <MenuItem mnemonicParsing="false" text="Create user"/>
+                <MenuItem mnemonicParsing="false" text="Create user" />
                 <MenuItem mnemonicParsing="false" text="Drop user" />
-                <MenuItem mnemonicParsing="false" text="Refresh MySql" onAction="#refresh" />
+                <MenuItem mnemonicParsing="false" onAction="#refresh" text="Refresh MySql" />
+<!--                <MenuItem mnemonicParsing="false" onAction="#save" text="Save MySql" />-->
                 <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
             </Menu>
             <Menu mnemonicParsing="false" text="Edit">
@@ -40,7 +41,7 @@
         </HBox>
     </left>
     <center>
-        <TableView fx:id="dataView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <TableView fx:id="dataView" editable="true" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
         </TableView>
     </center>
 </BorderPane>

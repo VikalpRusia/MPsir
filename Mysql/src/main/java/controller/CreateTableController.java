@@ -116,9 +116,9 @@ public class CreateTableController {
     }
 
     public static class AddColumnInTable {
-        private String columnName;
-        private String columnType;
-        private Boolean primaryKey;
+        private final String columnName;
+        private final String columnType;
+        private final Boolean primaryKey;
 
         public AddColumnInTable(String columnName, String columnType, boolean primaryKey) {
             this.columnName = columnName;
