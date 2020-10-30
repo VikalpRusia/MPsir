@@ -211,7 +211,12 @@ public class Controller {
                                 d.toString());
                     });
             tableColumn.setCellFactory(updateItem());
-            tableColumn.setOnEditCommit(t -> updateData(t.getNewValue(),t.getTableColumn().getText()));
+            tableColumn.setOnEditCommit(t -> {
+                updateData(t.getNewValue(),t.getTableColumn().getText());
+                TablePosition<ObservableList<Object>,String> tablePosition = t.getTablePosition();
+                System.out.println(tablePosition.getColumn());
+                t.getRowValue().set(tablePosition.getColumn(),t.getNewValue());
+            });
             dataView.getColumns().add(tableColumn);
         }
         dataView.setItems(columnsList.getColumn());
