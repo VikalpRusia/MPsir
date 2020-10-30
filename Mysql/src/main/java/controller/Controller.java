@@ -401,8 +401,7 @@ public class Controller {
             }
             System.out.println(values);
             database.deleteData(tableView.getSelectionModel().getSelectedItem(),values);
-            tableList.remove(tableView.getSelectionModel().getSelectedItem());
-
+            columnsList.getColumn().remove(dataView.getSelectionModel().getSelectedItem());
         } catch (SQLException e){
             alertShow(e);
         }
