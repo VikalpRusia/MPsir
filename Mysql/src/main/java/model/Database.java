@@ -84,21 +84,21 @@ public class Database implements AutoCloseable {
         Statement cursor = conn.createStatement();
 //        create table c(id int,primary key(id))
         StringBuilder s = new StringBuilder("CREATE TABLE " + tableName + " ( ");
-        for (int i=0;i< name.size();i++){
+        for (int i = 0; i < name.size(); i++) {
             s.append(name.get(i))
                     .append(" ")
                     .append(datatype.get(i));
-            if (i<name.size()-1){
+            if (i < name.size() - 1) {
                 s.append(", ");
             }
         }
-        if (primaryKey.size()>0){
+        if (primaryKey.size() > 0) {
             s.append(", PRIMARY KEY( ");
             System.out.println(primaryKey.size());
-            for (int i=0;i<primaryKey.size();i++) {
+            for (int i = 0; i < primaryKey.size(); i++) {
                 s.append(primaryKey.get(i))
                         .append(" ");
-                if (i<primaryKey.size()-1){
+                if (i < primaryKey.size() - 1) {
                     s.append(", ");
                 }
             }

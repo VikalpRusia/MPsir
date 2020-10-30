@@ -78,7 +78,7 @@ public class Controller {
         contextMenu_Data_Table = new ContextMenu();
         contextMenuTable = new ContextMenu();
         MenuItem addTable = new MenuItem("Add table");
-        addTable.setOnAction(tr ->{
+        addTable.setOnAction(tr -> {
             try {
                 inputTable();
             } catch (IOException e) {
@@ -99,7 +99,7 @@ public class Controller {
         contextMenu_Data_Table.getItems().addAll(addTable, deleteTable);
 
         MenuItem addTableEmpty = new MenuItem("Add table");
-        addTableEmpty.setOnAction(tr ->{
+        addTableEmpty.setOnAction(tr -> {
             try {
                 inputTable();
             } catch (IOException e) {
@@ -274,8 +274,17 @@ public class Controller {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setDialogPane(loader.load());
         CreateTableController controller = loader.getController();
-        Optional<ButtonType> result =dialog.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK){
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            if (controller.getTableName().equals("") || controller.getColumnsName().isEmpty()
+                    || controller.getColumnsType().isEmpty()
+            ) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("All fields are compulsory");
+                alert.setContentText("Database left unmodified\nTable Name,Table Column,Column Type\nAll are required fields");
+                alert.showAndWait();
+                return;
+            }
             try {
                 database.createTable(
                         controller.getTableName(),
@@ -285,7 +294,7 @@ public class Controller {
                 );
                 tableList.add(controller.getTableName());
                 tableView.getSelectionModel().select(0);
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 alertShow(e);
             }
         }
