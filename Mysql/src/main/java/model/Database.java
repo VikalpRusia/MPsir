@@ -79,14 +79,30 @@ public class Database implements AutoCloseable {
     }
 
     public void createTable(String tableName,
-                            List<String> name, List<String> datatype) throws SQLException {
+                            List<String> name, List<String> datatype,
+                            List<String> primaryKey) throws SQLException {
         Statement cursor = conn.createStatement();
-//        create table sampling(id int);
-        StringBuilder s = new StringBuilder("CREATE TABLE " + tableName + " (");
+//        create table c(id int,primary key(id))
+        StringBuilder s = new StringBuilder("CREATE TABLE " + tableName + " ( ");
         for (int i=0;i< name.size();i++){
             s.append(name.get(i))
                     .append(" ")
                     .append(datatype.get(i));
+            if (i<name.size()-1){
+                s.append(", ");
+            }
+        }
+        if (primaryKey.size()>0){
+            s.append(", PRIMARY KEY( ");
+            System.out.println(primaryKey.size());
+            for (int i=0;i<primaryKey.size();i++) {
+                s.append(primaryKey.get(i))
+                        .append(" ");
+                if (i<primaryKey.size()-1){
+                    s.append(", ");
+                }
+            }
+            s.append(" )");
         }
         s.append(")");
         System.out.println(s.toString());
