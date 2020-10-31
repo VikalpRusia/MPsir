@@ -16,7 +16,6 @@ import model.Database;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -70,6 +69,10 @@ public class Controller {
                 }
             };
             deletionHandling(databaseView, s);
+            if (databaseList.size()==0){
+                tableList.clear();
+                dataView.getColumns().clear();
+            }
         });
         contextMenu_Data_Database.getItems().addAll(addDatabase, deleteDatabase);
         MenuItem addDatabaseEmpty = new MenuItem("Add database");
@@ -103,6 +106,9 @@ public class Controller {
                 }
             };
             deletionHandling(tableView, consumer);
+            if (tableList.size()==0){
+                dataView.getColumns().clear();
+            }
         });
         MenuItem primaryKey = new MenuItem("Primary Key");
         primaryKey.setOnAction(s -> getPrimaryKey());
@@ -188,7 +194,7 @@ public class Controller {
             alertShow(e);
         }
         tableView.setItems(tableList);
-
+        dataView.getColumns().clear();//when table changes it should be reflected in data
         tableView.getSelectionModel().select(0);
     }
 
@@ -281,11 +287,13 @@ public class Controller {
             database.createDatabase(x);
             Pattern pattern = Pattern.compile("^(.*?);*$");
             Matcher matcher = pattern.matcher(x);
+            String s = null;
             while (matcher.find()) {
                 //1
-                databaseList.addAll(matcher.group(1).toLowerCase());
+                s=matcher.group(1).toLowerCase();
+                databaseList.addAll(s);
             }
-            dataView.setItems(null);
+            databaseView.getSelectionModel().select(s);
         }
     }
 
@@ -313,10 +321,11 @@ public class Controller {
                         controller.getPrimaryKeys()
                 );
                 tableList.add(controller.getTableName());
-                tableView.getSelectionModel().select(0);
+                tableView.getSelectionModel().select(controller.getTableName());
             } catch (SQLException e) {
                 alertShow(e);
             }
+
         }
 
     }
@@ -377,6 +386,7 @@ public class Controller {
                         controller.values()
                 );
                 columnsList.getColumn().add(controller.values());
+                dataView.getSelectionModel().select(controller.values());
             } catch (SQLException e) {
                 alertShow(e);
             }
