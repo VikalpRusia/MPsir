@@ -16,6 +16,7 @@ import model.Database;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -120,13 +121,13 @@ public class Controller {
         //table row Context
         contextMenuRow = new ContextMenu();
         MenuItem add_row = new MenuItem("Add row");
-//        add_row.setOnAction(e -> inputDataInTable());
+        add_row.setOnAction(e -> inputDataInTable());
         contextMenuRow.getItems().addAll(add_row);
 
         //table data context
         contextMenuDataRow = new ContextMenu();
         MenuItem add_row_Empty = new MenuItem("Add row");
-//        add_row_Empty.setOnAction(e -> inputDataInTable());
+        add_row_Empty.setOnAction(e -> inputDataInTable());
         MenuItem delete_row = new MenuItem("Delete row");
         delete_row.setOnAction(s -> deleteData());
         contextMenuDataRow.getItems().addAll(add_row_Empty, delete_row);
@@ -214,7 +215,7 @@ public class Controller {
             tableColumn.setOnEditCommit(t -> {
                 updateData(t.getNewValue(),t.getTableColumn().getText());
                 TablePosition<ObservableList<Object>,String> tablePosition = t.getTablePosition();
-                System.out.println(tablePosition.getColumn());
+//                System.out.println(tablePosition.getColumn());
                 t.getRowValue().set(tablePosition.getColumn(),t.getNewValue());
             });
             dataView.getColumns().add(tableColumn);
@@ -261,7 +262,7 @@ public class Controller {
         }
     }
 
-    public void alertShow(SQLException e) {
+    public void alertShow(Exception e) {
         Alert error = new Alert(Alert.AlertType.ERROR);
         error.setTitle("Query failed!");
         error.setHeaderText("error !");
@@ -319,7 +320,7 @@ public class Controller {
         }
 
     }
-    private Callback<TableColumn<ObservableList<Object>, String>, TableCell<ObservableList<Object>, String>> updateItem() {
+    protected static Callback<TableColumn<ObservableList<Object>, String>, TableCell<ObservableList<Object>, String>> updateItem() {
         return new Callback<>() {
             @Override
             public TableCell<ObservableList<Object>, String> call(TableColumn<ObservableList<Object>, String> observableListStringTableColumn) {
@@ -359,20 +360,28 @@ public class Controller {
     }
 
 
-//    public void inputDataInTable() {
-//        try {
-//            database.insertIntoTable("vikalp",
-//                    Arrays.asList("id", "rool"),
-//                    Arrays.asList("int", "double"),
-//                    Arrays.asList("23", "pop")
-//            );
-//        }catch (SQLException e){
-//            alertShow(e);
-//        }
-//    }
-//    public void save(){
-//
-//    }
+    public void inputDataInTable() {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/DataAddRow.fxml"));
+        Dialog<ButtonType> dialog = new Dialog<>();
+        try {
+            dialog.setDialogPane(fxmlLoader.load());
+        } catch (IOException e){
+            alertShow(e);
+        }
+        DataAddRowController controller = fxmlLoader.getController();
+        controller.setColumnsList(columnsList);
+        Optional<ButtonType> result =dialog.showAndWait();
+        if (result.isPresent() && result.get()==ButtonType.OK) {
+            try {
+                database.insertIntoTable(tableView.getSelectionModel().getSelectedItem(),
+                        controller.values()
+                );
+                columnsList.getColumn().add(controller.values());
+            } catch (SQLException e) {
+                alertShow(e);
+            }
+        }
+    }
     public void getPrimaryKey() {
         String tableName = tableView.getSelectionModel().getSelectedItem();
         try {
@@ -418,7 +427,7 @@ public class Controller {
                     dataView.getSelectionModel().getSelectedItem().get(key-1).toString()
             );
         }
-        System.out.println(values);
+//        System.out.println(values);
         return values;
     }
 }
