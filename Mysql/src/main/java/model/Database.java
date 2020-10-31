@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Database implements AutoCloseable {
     private final Connection conn;
@@ -112,48 +113,45 @@ public class Database implements AutoCloseable {
 
     }
 
-//    public void insertIntoTable(String tableName,
-//                                List<String> columnName, List<String> columnType,
-//                                List<String> columnData
-//    ) throws SQLException {
-////        INSERT INTO table_name1 ( column_1 ) values('viak');
-//        StringBuilder sb = new StringBuilder("INSERT INTO ");
-//        sb.append(tableName)
-//                .append(" (");
-//        for (int i = 0; i < columnName.size(); i++) {
-//            sb.append(" ")
-//                    .append(columnName.get(i));
-//            if (i < columnName.size() - 1) {
-//                sb.append(",");
-//            }
-//        }
-//        sb.append(") ")
-//                .append("VALUES (");
-//        for (int i = 0; i < columnData.size(); i++) {
-//            sb.append(" ");
-//            if (columnType.get(i).matches("^int")) {
-//                sb.append(columnData.get(i));
-//            } else if (columnType.get(i).matches("^double")) {
-//                sb.append(columnData.get(i));
-//            } else if (columnType.get(i).matches("^char\\(\\s*\\d+\\s*\\)$")) {
-//                sb.append("'")
-//                        .append(columnData.get(i))
-//                        .append("'");
-//            } else if (columnType.get(i).matches("^varchar\\(\\s*\\d+\\s*\\)$")) {
-//                sb.append("'")
-//                        .append(columnData.get(i))
-//                        .append("'");
-//            }
-//            if (i < columnData.size() - 1) {
-//                sb.append(",");
-//            }
-//        }
-//        sb.append(")");
-//        System.out.println(sb.toString());
-////        Statement cursor = conn.createStatement();
-////        cursor.execute(sb.toString());
-////        cursor.close();
-//    }
+    public void insertIntoTable(String tableName,
+                                List<Object> columnDatas
+    ) throws SQLException {
+        List<String> columnData = columnDatas.stream().map(s -> {
+            if (s==null)
+                return null;
+            return s.toString();
+        }).collect(Collectors.toList());
+//        INSERT INTO sampling(id,roll,name) VALUES('23','32','wde');
+        StringBuilder sb = new StringBuilder("INSERT INTO ");
+        sb.append(tableName)
+                .append(" VALUES (");
+        for (int i = 0; i < columnData.size(); ) {
+            if (columnData.get(i)==null){
+                sb.append(" null");
+                columnData.remove(i);
+                continue;
+            }
+            sb.append(" ?");
+            if (i < columnData.size() - 1) {
+                sb.append(",");
+            }
+            i++;
+        }
+        sb.append(")");
+        System.out.println(sb.toString());
+        insertion(columnData, sb);
+    }
+
+    private void insertion(List<String> columnData, StringBuilder sb) throws SQLException {
+        PreparedStatement cursor = conn.prepareStatement(sb.toString());
+        for (int i = 1; i <=columnData.size() ; i++) {
+
+            cursor.setString(i,columnData.get(i-1));
+        }
+        System.out.println(cursor.toString());
+        cursor.executeUpdate();
+        cursor.close();
+    }
 
 
     @Override
@@ -187,7 +185,7 @@ public class Database implements AutoCloseable {
         stringBuilder
                 .append("DELETE FROM ")
                 .append(tableName);
-        wherePrimaryKey(stringBuilder,tableName,value);
+        wherePrimaryKey(stringBuilder, tableName, value);
 
     }
 
@@ -204,9 +202,10 @@ public class Database implements AutoCloseable {
                 .append("'")
                 .append(newValue)
                 .append("'");
-        wherePrimaryKey(sb,tableName,value);
+        wherePrimaryKey(sb, tableName, value);
     }
-    private void wherePrimaryKey(StringBuilder sb, String tableName,List<String> value) throws SQLException {
+
+    private void wherePrimaryKey(StringBuilder sb, String tableName, List<String> value) throws SQLException {
         sb.append(" WHERE");
         List<String> strings = primaryKey(tableName);
         for (int i = 0; i < strings.size(); i++) {
@@ -217,13 +216,7 @@ public class Database implements AutoCloseable {
                 sb.append(" AND");
             }
         }
-        PreparedStatement preparedStatement = conn.prepareStatement(sb.toString());
-        for (int i = 1; i <= value.size(); i++) {
-            preparedStatement.setString(i, value.get(i - 1));
-        }
-        System.out.println(preparedStatement.toString());
-        preparedStatement.executeUpdate();
-        preparedStatement.close();
+        insertion(value, sb);
     }
 
     public static class Column {
