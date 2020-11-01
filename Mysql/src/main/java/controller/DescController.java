@@ -3,6 +3,7 @@ package controller;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.text.Font;
@@ -17,7 +18,8 @@ public class DescController {
     @FXML
     private TextFlow textFlow;
 
-    public void initialize(){
+
+    public void initialize() {
         view.selectedToggleProperty().addListener((observableValue, toggle, t1) -> {
             if (t1 == null) {
                 toggle.setSelected(true);
@@ -28,20 +30,24 @@ public class DescController {
         });
         Platform.runLater(this::about);
     }
-    public void about(){
+
+    public void about() {
         textFlow.getChildren().clear();
         Text text = new Text("This is project is architected,designed and implemented by ");
-        text.setFont(Font.font("Comic Sans MS",18));
+        text.setFont(Font.font("Comic Sans MS", 18));
         Text author = new Text("Vikalp Rusia");
-        author.setFont(Font.font("Comic Sans MS", FontWeight.BOLD,20));
-        textFlow.getChildren().addAll(text,author);
+        author.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+        textFlow.getChildren().addAll(text, author);
     }
-    public void contact(){
+
+    public void contact() {
         textFlow.getChildren().clear();
         Text text = new Text("Mail your valuable Suggestions at: ");
-        text.setFont(Font.font("Comic Sans MS",18));
-        Text mail = new Text("18bcs163@ietdavv.edu.in");
-        mail.setFont(Font.font("Comic Sans MS",FontWeight.BOLD,20));
-        textFlow.getChildren().addAll(text,mail);
+        text.setFont(Font.font("Comic Sans MS", 18));
+        Hyperlink mail = new Hyperlink("18bcs163@ietdavv.edu.in");
+        mail.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+        mail.setOnAction(actionEvent -> HostServicesProvider.INSTANCE.getHostServices()
+                .showDocument("mailto:18bcs163@ietdavv.edu.in?subject=Feedback"));
+        textFlow.getChildren().addAll(text, mail);
     }
 }
