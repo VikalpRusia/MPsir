@@ -2,32 +2,33 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane minHeight="900.0" minWidth="900.0" stylesheets="@../css/sample.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
+<BorderPane minHeight="900.0" minWidth="900.0" stylesheets="@../css/sample.css" xmlns="http://javafx.com/javafx/11.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <Menu text="_File">
-                <MenuItem mnemonicParsing="false" text="Create user" />
-                <MenuItem mnemonicParsing="false" text="Drop user" />
-                <MenuItem mnemonicParsing="false" onAction="#refresh" text="Refresh MySql" />
+                <MenuItem mnemonicParsing="false" text="Create user"/>
+                <MenuItem mnemonicParsing="false" text="Drop user"/>
+                <MenuItem mnemonicParsing="false" onAction="#refresh" text="Refresh MySql"/>
                 <!--                <MenuItem mnemonicParsing="false" onAction="#save" text="Save MySql" />-->
-                <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
+                <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit"/>
             </Menu>
             <Menu text="_Edit">
-                <MenuItem mnemonicParsing="false" text="Delete" />
+                <MenuItem mnemonicParsing="false" text="Delete"/>
             </Menu>
             <Menu text="_Help">
-                <MenuItem mnemonicParsing="false" onAction="#description" text="Description" />
+                <MenuItem mnemonicParsing="false" onAction="#description" text="Description"/>
             </Menu>
         </MenuBar>
     </top>
     <center>
         <SplitPane dividerPositions="0.1, 0.3" BorderPane.alignment="CENTER">
             <VBox alignment="TOP_CENTER">
-                <Label text="Label"/>
+                <Label text="Databases"/>
                 <ListView fx:id="databaseView" VBox.vgrow="ALWAYS"/>
             </VBox>
             <VBox alignment="TOP_CENTER">
-                <Label text="Label"/>
+                <Label text="Tables"/>
                 <ListView fx:id="tableView" VBox.vgrow="ALWAYS"/>
             </VBox>
             <TableView fx:id="dataView" editable="true">
