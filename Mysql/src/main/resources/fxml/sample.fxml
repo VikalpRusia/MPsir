@@ -13,17 +13,17 @@
 <BorderPane stylesheets="@../css/sample.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
     <top>
         <MenuBar BorderPane.alignment="CENTER">
-            <Menu mnemonicParsing="false" text="File">
+            <Menu text="_File">
                 <MenuItem mnemonicParsing="false" text="Create user" />
                 <MenuItem mnemonicParsing="false" text="Drop user" />
                 <MenuItem mnemonicParsing="false" onAction="#refresh" text="Refresh MySql" />
 <!--                <MenuItem mnemonicParsing="false" onAction="#save" text="Save MySql" />-->
                 <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit" />
             </Menu>
-            <Menu mnemonicParsing="false" text="Edit">
+            <Menu text="_Edit">
                 <MenuItem mnemonicParsing="false" text="Delete" />
             </Menu>
-            <Menu mnemonicParsing="false" text="Help">
+            <Menu text="_Help">
                 <MenuItem mnemonicParsing="false" text="About" />
             </Menu>
         </MenuBar>
