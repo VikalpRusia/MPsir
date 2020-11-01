@@ -46,6 +46,7 @@ public class Main extends Application {
     public void login(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Login Page!");
         dialog.setDialogPane(loader.load());
         DialogController controller = loader.getController();
         Optional<ButtonType> result = dialog.showAndWait();
