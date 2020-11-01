@@ -5,6 +5,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.paint.Color;
@@ -450,10 +452,16 @@ public class Controller {
         return values;
     }
 
-    public void about() {
+    public void description() throws IOException {
         Stage stage = new Stage();
         stage.initOwner(databaseView.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setResizable(false);
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/about.fxml"));
+        stage.setWidth(600);
+        stage.setHeight(600);
+        stage.setTitle("Descriptions !");
+        stage.setScene(new Scene(root));
         stage.showAndWait();
 
     }
