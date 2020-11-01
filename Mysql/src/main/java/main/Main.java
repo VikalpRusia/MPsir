@@ -2,6 +2,7 @@ package main;
 
 import controller.Controller;
 import controller.DialogController;
+import controller.HostServicesProvider;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -67,6 +68,7 @@ public class Main extends Application {
         primaryStage.setWidth(bounds.getWidth());
         primaryStage.setHeight(bounds.getHeight());
         primaryStage.setMaximized(true);
+        HostServicesProvider.INSTANCE.init(getHostServices());
 
         primaryStage.show();
 
