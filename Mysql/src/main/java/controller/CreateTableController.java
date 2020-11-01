@@ -63,6 +63,7 @@ public class CreateTableController {
     public void addImageClick() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/createTableAddColumn.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add column in Table");
         dialog.setDialogPane(loader.load());
         AddColumnController controller = loader.getController();
         Optional<ButtonType> result = dialog.showAndWait();
