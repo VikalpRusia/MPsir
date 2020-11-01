@@ -24,7 +24,7 @@
                 <MenuItem mnemonicParsing="false" text="Delete" />
             </Menu>
             <Menu text="_Help">
-                <MenuItem mnemonicParsing="false" text="About" />
+                <MenuItem mnemonicParsing="false" text="About" onAction="#about"/>
             </Menu>
         </MenuBar>
     </top>

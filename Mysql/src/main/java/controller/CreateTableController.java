@@ -64,6 +64,7 @@ public class CreateTableController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/createTableAddColumn.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add column in Table");
+        dialog.initOwner(dialogPane.getScene().getWindow());
         dialog.setDialogPane(loader.load());
         AddColumnController controller = loader.getController();
         Optional<ButtonType> result = dialog.showAndWait();

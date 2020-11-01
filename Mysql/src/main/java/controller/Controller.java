@@ -9,6 +9,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import model.Database;
@@ -258,6 +260,7 @@ public class Controller {
 
     public void deletionHandling(ListView<String> listView, Consumer<String> consumer) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.initOwner(databaseView.getScene().getWindow());
         alert.setHeaderText("You are going to delete " + listView.getSelectionModel().getSelectedItem() + " !");
         alert.setContentText("Are you Sure ?");
         Optional<ButtonType> result = alert.showAndWait();
@@ -270,6 +273,7 @@ public class Controller {
 
     public void alertShow(Exception e) {
         Alert error = new Alert(Alert.AlertType.ERROR);
+        error.initOwner(databaseView.getScene().getWindow());
         error.setTitle("Query failed!");
         error.setHeaderText("error !");
         error.setContentText(e.getMessage());
@@ -281,6 +285,7 @@ public class Controller {
         textInputDialog.setTitle("Database Name");
         textInputDialog.setHeaderText("Enter database Name: ");
         textInputDialog.setContentText("database cannot be empty");
+        textInputDialog.initOwner(databaseView.getScene().getWindow());
         Optional<String> result = textInputDialog.showAndWait();
         if (result.isPresent() && !result.get().equals("")) {
             String x = result.get();
@@ -301,6 +306,7 @@ public class Controller {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/createTable.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("New Table creation");
+        dialog.initOwner(databaseView.getScene().getWindow());
         dialog.setDialogPane(loader.load());
         CreateTableController controller = loader.getController();
         Optional<ButtonType> result = dialog.showAndWait();
@@ -374,6 +380,7 @@ public class Controller {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/DataAddRow.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Insert data in fields");
+        dialog.initOwner(databaseView.getScene().getWindow());
         try {
             dialog.setDialogPane(fxmlLoader.load());
         } catch (IOException e){
@@ -441,5 +448,13 @@ public class Controller {
         }
 //        System.out.println(values);
         return values;
+    }
+
+    public void about() {
+        Stage stage = new Stage();
+        stage.initOwner(databaseView.getScene().getWindow());
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.showAndWait();
+
     }
 }
