@@ -8,9 +8,6 @@ import javafx.scene.control.*;
 import javafx.stage.Screen;
 import model.Database;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static controller.Controller.updateItem;
 
 public class DataAddRowController {

@@ -300,6 +300,7 @@ public class Controller {
     public void inputTable() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/createTable.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("New Table creation");
         dialog.setDialogPane(loader.load());
         CreateTableController controller = loader.getController();
         Optional<ButtonType> result = dialog.showAndWait();
@@ -372,6 +373,7 @@ public class Controller {
     public void inputDataInTable() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/DataAddRow.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Insert data in fields");
         try {
             dialog.setDialogPane(fxmlLoader.load());
         } catch (IOException e){
