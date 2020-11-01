@@ -1,5 +1,6 @@
 package controller;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
@@ -19,6 +20,7 @@ public class DialogController {
         dialogPane.getButtonTypes().add(
                 ButtonType.OK
         );
+        Platform.runLater(() -> username.requestFocus());
     }
 
     public String getUsername() {
