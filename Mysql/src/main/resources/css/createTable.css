@@ -1,18 +1,21 @@
-#imagesContainer{
+#imagesContainer {
     -fx-border-width: 1px;
     -fx-border-color: black;
 }
-.operationalImage:hover{
+
+.operationalImage:hover {
     -fx-border-radius: 3px;
     -fx-border-color: skyblue;
     -fx-background-color: #D3D3D3;
 }
-.operationalImage{
+
+.operationalImage {
     -fx-border-width: 1px;
     -fx-border-color: transparent;
     -fx-padding: 2px;
 }
-#mainContainerColumn{
+
+#mainContainerColumn {
     -fx-border-width: 1px 0px 1px 1px;
     -fx-border-color: black;
 }

@@ -14,7 +14,8 @@ public class DialogController {
     private PasswordField password;
     @FXML
     private DialogPane dialogPane;
-    public void initialize(){
+
+    public void initialize() {
         dialogPane.getButtonTypes().add(
                 ButtonType.CLOSE);
         dialogPane.getButtonTypes().add(

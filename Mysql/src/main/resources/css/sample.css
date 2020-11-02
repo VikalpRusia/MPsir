@@ -9,6 +9,7 @@
 .list-cell:empty {
     -fx-background-color: white;
 }
-.primaryKey{
-    -fx-background-color:transparent;
+
+.primaryKey {
+    -fx-background-color: transparent;
 }

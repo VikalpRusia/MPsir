@@ -44,6 +44,7 @@ public class Main extends Application {
         Platform.exit();
         System.exit(0);
     }
+
     public void login(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -51,12 +52,13 @@ public class Main extends Application {
         dialog.setDialogPane(loader.load());
         DialogController controller = loader.getController();
         Optional<ButtonType> result = dialog.showAndWait();
-        if (result.isPresent() && result.get()==ButtonType.OK){
+        if (result.isPresent() && result.get() == ButtonType.OK) {
             initialiseDatabase(controller.getUsername(), controller.getPassword());
             display(primaryStage);
         }
 
     }
+
     public void display(Stage primaryStage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/sample.fxml"));
         primaryStage.setTitle("MY WORKBENCH");
@@ -73,9 +75,10 @@ public class Main extends Application {
         primaryStage.show();
 
     }
-    public void initialiseDatabase(String username,String password) throws Exception {
+
+    public void initialiseDatabase(String username, String password) throws Exception {
         try {
-            database = new Database(username,password);
+            database = new Database(username, password);
         } catch (SQLException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Database not responsive");
