@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -12,6 +13,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
@@ -216,8 +218,7 @@ public class Controller {
             alertShow(e);
         }
         for (int i = 0; i < columnsList.getHsize(); i++) {
-            TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>(
-                    columnsList.getHeading().get(i) + "\n" + columnsList.getType().get(i));
+            TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>();
             int finalI = i;
             tableColumn.setCellValueFactory(
                     observableListStringCellDataFeatures -> {
@@ -228,6 +229,7 @@ public class Controller {
                         return new SimpleStringProperty(
                                 d.toString());
                     });
+            HBox hBox = new HBox(10);
             if (key != null &&
                     z < key.size() &&
                     columnsList.getHeading().get(i).equals(key.get(z))) {
@@ -236,12 +238,19 @@ public class Controller {
                         .getResource("/image/primarkey.png").toExternalForm()));
                 img.setFitWidth(15);
                 img.setFitHeight(15);
-                HBox hBox = new HBox(img);
-                hBox.prefHeightProperty().bind(img.fitHeightProperty());
-                hBox.prefWidthProperty().bind(img.fitWidthProperty());
                 img.getStyleClass().add("primaryKey");
-                tableColumn.setGraphic(hBox);
+                hBox.getChildren().add(img);
             }
+            Label heading = new Label(columnsList.getHeading().get(i));
+            Label dataType = new Label(columnsList.getType().get(i));
+            VBox textContainer = new VBox(heading, dataType);
+            hBox.getChildren().addAll(textContainer);
+            hBox.setAlignment(Pos.CENTER_LEFT);
+            hBox.setMaxWidth(HBox.USE_PREF_SIZE);
+            hBox.setMinWidth(HBox.USE_PREF_SIZE);
+            tableColumn.setGraphic(hBox);
+            hBox.widthProperty().addListener((observableValue, number, t1) ->
+                    tableColumn.setPrefWidth(hBox.prefWidth(-1) + 10));
             tableColumn.setCellFactory(updateItem());
             tableColumn.setOnEditCommit(t -> {
                 updateData(t.getNewValue(), t.getTableColumn().getText());
