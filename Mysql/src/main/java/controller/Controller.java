@@ -9,6 +9,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
@@ -73,7 +76,7 @@ public class Controller {
                 }
             };
             deletionHandling(databaseView, s);
-            if (databaseList.size()==0){
+            if (databaseList.size() == 0) {
                 tableList.clear();
                 dataView.getColumns().clear();
             }
@@ -110,13 +113,13 @@ public class Controller {
                 }
             };
             deletionHandling(tableView, consumer);
-            if (tableList.size()==0){
+            if (tableList.size() == 0) {
                 dataView.getColumns().clear();
             }
         });
         MenuItem primaryKey = new MenuItem("Primary Key");
         primaryKey.setOnAction(s -> getPrimaryKey());
-        contextMenu_Data_Table.getItems().addAll(addTable, deleteTable,primaryKey);
+        contextMenu_Data_Table.getItems().addAll(addTable, deleteTable, primaryKey);
 
         MenuItem addTableEmpty = new MenuItem("Add table");
         addTableEmpty.setOnAction(tr -> {
@@ -204,8 +207,11 @@ public class Controller {
 
     public void changedTable(String tableName) {
         dataView.getColumns().clear();
+        List<String> key = null;
+        int z = 0;
         try {
             columnsList = database.showData(tableName);
+            key = database.primaryKey(tableName);
         } catch (SQLException e) {
             alertShow(e);
         }
@@ -221,12 +227,26 @@ public class Controller {
                         return new SimpleStringProperty(
                                 d.toString());
                     });
+            if (key != null &&
+                    z < key.size() &&
+                    columnsList.getHeading().get(i).equals(key.get(z))) {
+                z++;
+                ImageView img = new ImageView(new Image(getClass()
+                        .getResource("/image/primarkey.png").toExternalForm()));
+                img.setFitWidth(15);
+                img.setFitHeight(15);
+                HBox hBox = new HBox(img);
+                hBox.prefHeightProperty().bind(img.fitHeightProperty());
+                hBox.prefWidthProperty().bind(img.fitWidthProperty());
+                img.getStyleClass().add("primaryKey");
+                tableColumn.setGraphic(hBox);
+            }
             tableColumn.setCellFactory(updateItem());
             tableColumn.setOnEditCommit(t -> {
-                updateData(t.getNewValue(),t.getTableColumn().getText());
-                TablePosition<ObservableList<Object>,String> tablePosition = t.getTablePosition();
+                updateData(t.getNewValue(), t.getTableColumn().getText());
+                TablePosition<ObservableList<Object>, String> tablePosition = t.getTablePosition();
 //                System.out.println(tablePosition.getColumn());
-                t.getRowValue().set(tablePosition.getColumn(),t.getNewValue());
+                t.getRowValue().set(tablePosition.getColumn(), t.getNewValue());
             });
             dataView.getColumns().add(tableColumn);
         }
@@ -297,7 +317,7 @@ public class Controller {
             String s = null;
             while (matcher.find()) {
                 //1
-                s=matcher.group(1).toLowerCase();
+                s = matcher.group(1).toLowerCase();
                 databaseList.addAll(s);
             }
             databaseView.getSelectionModel().select(s);
@@ -338,6 +358,7 @@ public class Controller {
         }
 
     }
+
     protected static Callback<TableColumn<ObservableList<Object>, String>, TableCell<ObservableList<Object>, String>> updateItem() {
         return new Callback<>() {
             @Override
@@ -353,16 +374,15 @@ public class Controller {
                         return s;
                     }
                 };
-                return new TextFieldTableCell<>(stringConverter){
+                return new TextFieldTableCell<>(stringConverter) {
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
                         setFont(Font.font(15));
-                        if(empty){
+                        if (empty) {
                             setText(null);
                             setEditable(false);
-                        }
-                        else if (item==null){
+                        } else if (item == null) {
                             setText("<Null>");
                             setTextFill(Color.PURPLE);
                             setEditable(true);
@@ -385,13 +405,13 @@ public class Controller {
         dialog.initOwner(databaseView.getScene().getWindow());
         try {
             dialog.setDialogPane(fxmlLoader.load());
-        } catch (IOException e){
+        } catch (IOException e) {
             alertShow(e);
         }
         DataAddRowController controller = fxmlLoader.getController();
         controller.setColumnsList(columnsList);
-        Optional<ButtonType> result =dialog.showAndWait();
-        if (result.isPresent() && result.get()==ButtonType.OK) {
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 database.insertIntoTable(tableView.getSelectionModel().getSelectedItem(),
                         controller.values()
@@ -403,6 +423,7 @@ public class Controller {
             }
         }
     }
+
     public void getPrimaryKey() {
         String tableName = tableView.getSelectionModel().getSelectedItem();
         try {
@@ -413,39 +434,41 @@ public class Controller {
             alert.setHeaderText("Primary keys are !");
             alert.setContentText(s.toString());
             alert.showAndWait();
-        } catch (SQLException e){
+        } catch (SQLException e) {
             alertShow(e);
         }
     }
-    public void deleteData(){
+
+    public void deleteData() {
         try {
             List<String> values = primaryKeyValues();
-            database.deleteData(tableView.getSelectionModel().getSelectedItem(),values);
+            database.deleteData(tableView.getSelectionModel().getSelectedItem(), values);
             columnsList.getColumn().remove(dataView.getSelectionModel().getSelectedItem());
-        } catch (SQLException e){
+        } catch (SQLException e) {
             alertShow(e);
         }
 
     }
 
-    public void updateData(String newValue,String columnModified) {
+    public void updateData(String newValue, String columnModified) {
         try {
             List<String> values = primaryKeyValues();
             database.updateData(tableView.getSelectionModel().getSelectedItem(),
-                    columnModified,newValue,values);
+                    columnModified, newValue, values);
 
         } catch (SQLException e) {
             alertShow(e);
         }
     }
+
     private List<String> primaryKeyValues() throws SQLException {
         List<Integer> primaryKeyColumns = database.positionPrimaryKey(
                 tableView.getSelectionModel().getSelectedItem()
         );
         List<String> values = new ArrayList<>();
-        for (Integer key:primaryKeyColumns) {
+        for (Integer key : primaryKeyColumns) {
             values.add(
-                    dataView.getSelectionModel().getSelectedItem().get(key-1).toString()
+                    dataView.getSelectionModel().getSelectedItem().get(key - 1).toString()
             );
         }
 //        System.out.println(values);
