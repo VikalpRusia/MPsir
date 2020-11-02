@@ -51,6 +51,7 @@ public class Database implements AutoCloseable {
 //            System.out.print(rs.getColumnName(i) + " ");
         }
         columns.setHeading(heading);
+        columns.setType(descSingle(tableName, 2));
         while (resultSet.next()) {
             ObservableList<Object> observableList = FXCollections.observableArrayList();
             for (int i = 1; i <= rs.getColumnCount(); i++) {
@@ -117,7 +118,7 @@ public class Database implements AutoCloseable {
                                 List<Object> columnDatas
     ) throws SQLException {
         List<String> columnData = columnDatas.stream().map(s -> {
-            if (s==null)
+            if (s == null)
                 return null;
             return s.toString();
         }).collect(Collectors.toList());
@@ -126,7 +127,7 @@ public class Database implements AutoCloseable {
         sb.append(tableName)
                 .append(" VALUES (");
         for (int i = 0; i < columnData.size(); ) {
-            if (columnData.get(i)==null){
+            if (columnData.get(i) == null) {
                 sb.append(" null");
                 columnData.remove(i);
                 continue;
@@ -144,9 +145,9 @@ public class Database implements AutoCloseable {
 
     private void insertion(List<String> columnData, StringBuilder sb) throws SQLException {
         PreparedStatement cursor = conn.prepareStatement(sb.toString());
-        for (int i = 1; i <=columnData.size() ; i++) {
+        for (int i = 1; i <= columnData.size(); i++) {
 
-            cursor.setString(i,columnData.get(i-1));
+            cursor.setString(i, columnData.get(i - 1));
         }
         System.out.println(cursor.toString());
         cursor.executeUpdate();
@@ -219,11 +220,50 @@ public class Database implements AutoCloseable {
         insertion(value, sb);
     }
 
+    public ObservableList<String> descSingle(String tableName, int index) throws SQLException {
+        Statement cursor = conn.createStatement();
+        ResultSet resultSet = cursor.executeQuery("DESC " + tableName);
+        ObservableList<String> observableList = FXCollections.observableArrayList();
+        while (resultSet.next()) {
+            observableList.add(resultSet.getString(index));
+        }
+        cursor.close();
+        return observableList;
+    }
+
+    public ObservableList<ObservableList<String>> descAll(String tableNAme) throws SQLException {
+        Statement cursor = conn.createStatement();
+        ResultSet resultSet = cursor.executeQuery("DESC " + tableNAme);
+        ObservableList<ObservableList<String>> observableLists = FXCollections.observableArrayList();
+        while (resultSet.next()) {
+            ObservableList<String> mid = FXCollections.observableArrayList();
+            mid.add(resultSet.getString(1));
+            mid.add(resultSet.getString(2));
+            mid.add(resultSet.getString(3));
+            mid.add(resultSet.getString(4));
+            mid.add(resultSet.getString(5));
+            mid.add(resultSet.getString(6));
+            observableLists.add(mid);
+        }
+        cursor.close();
+        return observableLists;
+
+    }
+
     public static class Column {
         ObservableList<String> heading;
         ObservableList<ObservableList<Object>> column;
+        ObservableList<String> type;
         int hsize;
         int vsize;
+
+        public void setType(ObservableList<String> type) {
+            this.type = type;
+        }
+
+        public ObservableList<String> getType() {
+            return type;
+        }
 
         public int getHsize() {
             return hsize;

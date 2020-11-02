@@ -216,7 +216,8 @@ public class Controller {
             alertShow(e);
         }
         for (int i = 0; i < columnsList.getHsize(); i++) {
-            TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>(columnsList.getHeading().get(i));
+            TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>(
+                    columnsList.getHeading().get(i) + "\n" + columnsList.getType().get(i));
             int finalI = i;
             tableColumn.setCellValueFactory(
                     observableListStringCellDataFeatures -> {
