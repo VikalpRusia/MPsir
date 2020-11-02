@@ -21,18 +21,29 @@ public class AddColumnController {
     private ComboBox<String> columnType;
 
     @FXML
-    public void initialize(){
+    public void initialize() {
         dialogPane.getButtonTypes().addAll(
-                ButtonType.OK,ButtonType.CLOSE
+                ButtonType.OK, ButtonType.CLOSE
         );
+        columnType.getSelectionModel().selectedIndexProperty().addListener(
+                (observableValue, number, t1) -> {
+                    int value = t1.intValue();
+                    if (value >= 0) {
+                        columnType.getEditor().positionCaret(
+                                columnType.getItems().get(value).length());
+                    }
+                });
     }
-    public String getColumnName(){
+
+    public String getColumnName() {
         return columnName.getText();
     }
-    public String getColumnType(){
+
+    public String getColumnType() {
         return columnType.getValue();
     }
-    public Boolean getPrimaryKey(){
+
+    public Boolean getPrimaryKey() {
         return primaryKey.getValue();
     }
 }
