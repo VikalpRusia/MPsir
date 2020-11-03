@@ -97,7 +97,7 @@ public class Database implements AutoCloseable {
         }
         if (primaryKey.size() > 0) {
             s.append(", PRIMARY KEY( ");
-            System.out.println(primaryKey.size());
+//            System.out.println(primaryKey.size());
             for (int i = 0; i < primaryKey.size(); i++) {
                 s.append(primaryKey.get(i))
                         .append(" ");
@@ -127,11 +127,6 @@ public class Database implements AutoCloseable {
         sb.append(tableName)
                 .append(" VALUES (");
         for (int i = 0; i < columnData.size(); ) {
-            if (columnData.get(i) == null) {
-                sb.append(" null");
-                columnData.remove(i);
-                continue;
-            }
             sb.append(" ?");
             if (i < columnData.size() - 1) {
                 sb.append(",");
@@ -139,15 +134,16 @@ public class Database implements AutoCloseable {
             i++;
         }
         sb.append(")");
-        System.out.println(sb.toString());
-        insertion(columnData, sb);
+//        System.out.println(sb.toString());
+        PreparedStatement cursor = conn.prepareStatement(sb.toString());
+        insertion(columnData, cursor, 0);
     }
 
-    private void insertion(List<String> columnData, StringBuilder sb) throws SQLException {
-        PreparedStatement cursor = conn.prepareStatement(sb.toString());
+    private void insertion(List<String> columnData, PreparedStatement cursor, int y) throws SQLException {
+
         for (int i = 1; i <= columnData.size(); i++) {
 
-            cursor.setString(i, columnData.get(i - 1));
+            cursor.setString(i+y, columnData.get(i - 1));
         }
         System.out.println(cursor.toString());
         cursor.executeUpdate();
@@ -186,7 +182,9 @@ public class Database implements AutoCloseable {
         stringBuilder
                 .append("DELETE FROM ")
                 .append(tableName);
-        wherePrimaryKey(stringBuilder, tableName, value);
+        PreparedStatement cursor = conn.prepareStatement(
+                wherePrimaryKey(stringBuilder, tableName).toString());
+        insertion(value, cursor, 0);
 
     }
 
@@ -199,18 +197,17 @@ public class Database implements AutoCloseable {
                 .append(tableName)
                 .append(" SET ")
                 .append(columnModified)
-                .append(" = ");
-        if (newValue != null) {
-            sb.append("'")
-                    .append(newValue)
-                    .append("'");
-        } else {
-            sb.append(newValue);
-        }
-        wherePrimaryKey(sb, tableName, value);
+                .append(" = ")
+                .append("?");
+
+        PreparedStatement cursor = conn.prepareStatement(
+                wherePrimaryKey(sb, tableName).toString());
+        cursor.setString(1,newValue);
+        insertion(value,cursor,1);
+
     }
 
-    private void wherePrimaryKey(StringBuilder sb, String tableName, List<String> value) throws SQLException {
+    private StringBuilder wherePrimaryKey(StringBuilder sb, String tableName) throws SQLException {
         sb.append(" WHERE");
         List<String> strings = primaryKey(tableName);
         for (int i = 0; i < strings.size(); i++) {
@@ -221,7 +218,7 @@ public class Database implements AutoCloseable {
                 sb.append(" AND");
             }
         }
-        insertion(value, sb);
+        return sb;
     }
 
     public ObservableList<String> descSingle(String tableName, int index) throws SQLException {
