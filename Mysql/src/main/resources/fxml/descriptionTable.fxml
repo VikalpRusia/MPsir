@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+
+<TableView fx:id="tableView" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controller.DescriptionTableController">
+    <columns>
+        <TableColumn fx:id="field" text="Field"/>
+        <TableColumn fx:id="type" text="Type"/>
+        <TableColumn fx:id="nullConstraint" text="Null"/>
+        <TableColumn fx:id="key" text="Key"/>
+        <TableColumn fx:id="defaultConstraint" text="Default"/>
+        <TableColumn fx:id="extra" text="Extra"/>
+    </columns>
+</TableView>
