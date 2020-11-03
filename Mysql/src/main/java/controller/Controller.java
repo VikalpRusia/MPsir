@@ -167,7 +167,7 @@ public class Controller {
 //            System.out.println(dataView.getFocusModel().getFocusedItem());
 
 //            columnsList.get.set(sample.getColumn(), null);
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 alertShow(e);
             }
         });
@@ -189,24 +189,24 @@ public class Controller {
         tableView.setCellFactory(stringListView -> contextFunction(contextMenu_Data_Table, contextMenuTable));
         tableView.setContextMenu(contextMenuTable);
 
-        dataView.setRowFactory(new Callback<>() {
-            @Override
-            public TableRow<ObservableList<Object>> call(TableView<ObservableList<Object>> observableListTableView) {
-                return new TableRow<>() {
-                    @Override
-                    protected void updateItem(ObservableList<Object> item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty || item == null) {
-                            setItem(null);
-                            setContextMenu(contextMenuRow);
-                        } else {
-                            setItem(item);
-                            setContextMenu(contextMenuDataRow);
-                        }
-                    }
-                };
-            }
-        });
+//        dataView.setRowFactory(new Callback<>() {
+//            @Override
+//            public TableRow<ObservableList<Object>> call(TableView<ObservableList<Object>> observableListTableView) {
+//                return new TableRow<>() {
+//                    @Override
+//                    protected void updateItem(ObservableList<Object> item, boolean empty) {
+//                        super.updateItem(item, empty);
+//                        if (empty || item == null) {
+//                            setItem(null);
+//                            setContextMenu(contextMenuRow);
+//                        } else {
+//                            setItem(item);
+//                            setContextMenu(contextMenuDataRow);
+//                        }
+//                    }
+//                };
+//            }
+//        });
         dataView.setContextMenu(contextMenuRow);
     }
 
@@ -289,7 +289,7 @@ public class Controller {
 //                System.out.println(tablePosition.getColumn());
                     t.getRowValue().set(tablePosition.getColumn(), t.getNewValue());
                     dataView.requestFocus();
-                } catch (SQLException e){
+                } catch (SQLException e) {
                     alertShow(e);
                 }
             });
@@ -406,7 +406,7 @@ public class Controller {
 
     }
 
-    protected static Callback<TableColumn<ObservableList<Object>, String>, TableCell<ObservableList<Object>, String>> updateItem() {
+    protected Callback<TableColumn<ObservableList<Object>, String>, TableCell<ObservableList<Object>, String>> updateItem() {
         return new Callback<>() {
             @Override
             public TableCell<ObservableList<Object>, String> call(TableColumn<ObservableList<Object>, String> observableListStringTableColumn) {
@@ -429,14 +429,17 @@ public class Controller {
                         if (empty) {
                             setText(null);
                             setEditable(false);
+                            setContextMenu(contextMenuRow);
                         } else if (item == null) {
                             setText("<Null>");
                             setTextFill(Color.PURPLE);
                             setEditable(true);
+                            setContextMenu(contextMenuDataRow);
                         } else {
                             setText(item);
                             setTextFill(Color.BLACK);
                             setEditable(true);
+                            setContextMenu(contextMenuDataRow);
                         }
                     }
                 };
@@ -464,7 +467,8 @@ public class Controller {
                         controller.values()
                 );
                 columnsList.getColumn().add(controller.values());
-                dataView.getSelectionModel().select(controller.values());
+                dataView.getSelectionModel().clearSelection();
+//                dataView.getSelectionModel().clearAndSelect(columnsList.getColumn().size()-1);
             } catch (SQLException e) {
                 alertShow(e);
             }
@@ -491,6 +495,8 @@ public class Controller {
             List<String> values = primaryKeyValues();
             database.deleteData(tableView.getSelectionModel().getSelectedItem(), values);
             columnsList.getColumn().remove(dataView.getSelectionModel().getSelectedItem());
+            dataView.getSelectionModel().clearSelection();
+            dataView.requestFocus();
         } catch (SQLException e) {
             alertShow(e);
         }
@@ -498,9 +504,9 @@ public class Controller {
     }
 
     public void updateData(String newValue, String columnModified) throws SQLException {
-            List<String> values = primaryKeyValues();
-            database.updateData(tableView.getSelectionModel().getSelectedItem(),
-                    columnModified, newValue, values);
+        List<String> values = primaryKeyValues();
+        database.updateData(tableView.getSelectionModel().getSelectedItem(),
+                columnModified, newValue, values);
     }
 
     private List<String> primaryKeyValues() throws SQLException {
