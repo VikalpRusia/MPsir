@@ -24,9 +24,7 @@ import model.Database;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +39,7 @@ public class Controller {
     ObservableList<String> databaseList;
     ObservableList<String> tableList;
     Database.Column columnsList;
+    Map<TableColumn<ObservableList<Object>, String>, String> tableColumnName;
 
     ContextMenu contextMenu_Data_Database;
     ContextMenu contextMenuDatabase;
@@ -58,6 +57,9 @@ public class Controller {
 
     public void initialize() {
         dataView.setEditable(true);
+//        dataView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        dataView.getSelectionModel().setCellSelectionEnabled(true);
+
         contextMenu_Data_Database = new ContextMenu();
         contextMenuDatabase = new ContextMenu();
         MenuItem addDatabase = new MenuItem("Add database");
@@ -151,9 +153,27 @@ public class Controller {
         contextMenuDataRow = new ContextMenu();
         MenuItem add_row_Empty = new MenuItem("Add row");
         add_row_Empty.setOnAction(e -> inputDataInTable());
+        MenuItem add_null = new MenuItem("Update to null");
+        add_null.setOnAction(z -> {
+            try {
+                TablePosition<ObservableList<Object>, String> sample = dataView.getFocusModel().getFocusedCell();
+//            System.out.println(tableColumnName.get(sample.getTableColumn()));
+                updateToNull(tableColumnName.get(sample.getTableColumn()));
+//            System.out.println(dataView.getFocusModel().getFocusedItem());
+                ObservableList<Object> change = dataView.getFocusModel().getFocusedItem();
+                change.set(sample.getColumn(), null);
+                columnsList.getColumn().set(sample.getRow(), change);
+                dataView.getSelectionModel().select(sample.getRow(), sample.getTableColumn());
+//            System.out.println(dataView.getFocusModel().getFocusedItem());
+
+//            columnsList.get.set(sample.getColumn(), null);
+            } catch (SQLException e){
+                alertShow(e);
+            }
+        });
         MenuItem delete_row = new MenuItem("Delete row");
         delete_row.setOnAction(s -> deleteData());
-        contextMenuDataRow.getItems().addAll(add_row_Empty, delete_row);
+        contextMenuDataRow.getItems().addAll(add_row_Empty, add_null, delete_row);
 
         databaseView.getSelectionModel().selectedItemProperty().addListener((observableValue, s, t1) -> {
             if (t1 != null) {
@@ -217,6 +237,8 @@ public class Controller {
 
     public void changedTable(String tableName) {
         dataView.getColumns().clear();
+        tableColumnName = new HashMap<>();
+
         List<String> key = null;
         int z = 0;
         try {
@@ -261,12 +283,19 @@ public class Controller {
                     tableColumn.setPrefWidth(hBox.prefWidth(-1) + 10));
             tableColumn.setCellFactory(updateItem());
             tableColumn.setOnEditCommit(t -> {
-                updateData(t.getNewValue(), t.getTableColumn().getText());
-                TablePosition<ObservableList<Object>, String> tablePosition = t.getTablePosition();
+                try {
+                    updateData(t.getNewValue(), tableColumnName.get(t.getTableColumn()));
+                    TablePosition<ObservableList<Object>, String> tablePosition = t.getTablePosition();
 //                System.out.println(tablePosition.getColumn());
-                t.getRowValue().set(tablePosition.getColumn(), t.getNewValue());
+                    t.getRowValue().set(tablePosition.getColumn(), t.getNewValue());
+                    dataView.requestFocus();
+                } catch (SQLException e){
+                    alertShow(e);
+                }
             });
             dataView.getColumns().add(tableColumn);
+            tableColumnName.put(tableColumn, columnsList.getHeading().get(i));
+
         }
         dataView.setItems(columnsList.getColumn());
 
@@ -468,15 +497,10 @@ public class Controller {
 
     }
 
-    public void updateData(String newValue, String columnModified) {
-        try {
+    public void updateData(String newValue, String columnModified) throws SQLException {
             List<String> values = primaryKeyValues();
             database.updateData(tableView.getSelectionModel().getSelectedItem(),
                     columnModified, newValue, values);
-
-        } catch (SQLException e) {
-            alertShow(e);
-        }
     }
 
     private List<String> primaryKeyValues() throws SQLException {
@@ -520,4 +544,9 @@ public class Controller {
 //        stage.setResizable(false);
         stage.showAndWait();
     }
+
+    public void updateToNull(String columnModified) throws SQLException {
+        updateData(null, columnModified);
+    }
+
 }
