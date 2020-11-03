@@ -121,7 +121,15 @@ public class Controller {
         });
         MenuItem primaryKey = new MenuItem("Primary Key");
         primaryKey.setOnAction(s -> getPrimaryKey());
-        contextMenu_Data_Table.getItems().addAll(addTable, deleteTable, primaryKey);
+        MenuItem description = new MenuItem("Description");
+        description.setOnAction(s -> {
+            try {
+                descriptionTable(tableView.getSelectionModel().getSelectedItem());
+            } catch (IOException | SQLException e) {
+                alertShow(e);
+            }
+        });
+        contextMenu_Data_Table.getItems().addAll(addTable, deleteTable, primaryKey, description);
 
         MenuItem addTableEmpty = new MenuItem("Add table");
         addTableEmpty.setOnAction(tr -> {
@@ -497,5 +505,19 @@ public class Controller {
         stage.setScene(new Scene(root));
         stage.showAndWait();
 
+    }
+
+    public void descriptionTable(String tableName) throws IOException, SQLException {
+        Stage stage = new Stage();
+        stage.initOwner(databaseView.getScene().getWindow());
+        stage.initModality(Modality.APPLICATION_MODAL);
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/descriptionTable.fxml"));
+        stage.setScene(new Scene(fxmlLoader.load()));
+        stage.sizeToScene();
+        DescriptionTableController descController = fxmlLoader.getController();
+        descController.setData(database.descAll(tableName));
+        stage.setTitle("Description of " + tableName);
+//        stage.setResizable(false);
+        stage.showAndWait();
     }
 }
