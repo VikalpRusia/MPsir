@@ -199,10 +199,14 @@ public class Database implements AutoCloseable {
                 .append(tableName)
                 .append(" SET ")
                 .append(columnModified)
-                .append(" = ")
-                .append("'")
-                .append(newValue)
-                .append("'");
+                .append(" = ");
+        if (newValue != null) {
+            sb.append("'")
+                    .append(newValue)
+                    .append("'");
+        } else {
+            sb.append(newValue);
+        }
         wherePrimaryKey(sb, tableName, value);
     }
 
