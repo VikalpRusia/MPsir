@@ -213,6 +213,7 @@ public class Services {
     public static class DeleteData extends Service<Integer> {
         String tableName;
         List<String> values;
+        List<String> primaryKey;
 
         public void setTableName(String tableName) {
             this.tableName = tableName;
@@ -222,12 +223,16 @@ public class Services {
             this.values = values;
         }
 
+        public void setPrimaryKey(List<String> primaryKey) {
+            this.primaryKey = primaryKey;
+        }
+
         @Override
         protected Task<Integer> createTask() {
             return new Task<>() {
                 @Override
                 protected Integer call() throws Exception {
-                    return database.deleteData(tableName, values);
+                    return database.deleteData(tableName, values,primaryKey);
                 }
             };
         }
@@ -238,6 +243,11 @@ public class Services {
         String columnModified;
         String newValue;
         List<String> values;
+        List<String> primaryKey;
+
+        public void setPrimaryKey(List<String> primaryKey) {
+            this.primaryKey = primaryKey;
+        }
 
         public void setTableName(String tableName) {
             this.tableName = tableName;
@@ -261,7 +271,7 @@ public class Services {
                 @Override
                 protected Integer call() throws Exception {
                     return database.updateData(tableName,
-                            columnModified, newValue, values);
+                            columnModified, newValue, values,primaryKey);
                 }
             };
         }

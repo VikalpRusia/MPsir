@@ -619,6 +619,7 @@ public class Controller {
                 List<String> values = primaryKeyValueProvider.getValue();
                 deleteData.setTableName(tableName);
                 deleteData.setValues(values);
+                deleteData.setPrimaryKey(primaryKey);
                 deleteData.setOnSucceeded(workerStateEvent2 -> {
                     columnDetailsProvider.getValue().getColumn().remove(dataView.getSelectionModel().getSelectedItem());
                     dataView.getSelectionModel().clearSelection();
@@ -648,6 +649,7 @@ public class Controller {
                 updateData.setColumnModified(columnModified);
                 updateData.setNewValue(newValue);
                 updateData.setValues(values);
+                updateData.setPrimaryKey(primaryKey);
                 startService(updateData);
             });
             startService(primaryKeyValueProvider);
