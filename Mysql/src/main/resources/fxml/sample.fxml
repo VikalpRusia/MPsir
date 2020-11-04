@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<BorderPane stylesheets="@../css/sample.css" xmlns="http://javafx.com/javafx/11.0.1"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.Controller">
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane stylesheets="@../css/sample.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controller.Controller">
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <Menu text="_File">
@@ -31,8 +41,15 @@
                 <Label text="Tables"/>
                 <ListView fx:id="tableView" VBox.vgrow="ALWAYS"/>
             </VBox>
-            <TableView fx:id="dataView" editable="true">
-            </TableView>
+            <VBox alignment="TOP_RIGHT">
+                <TableView fx:id="dataView" editable="true" VBox.vgrow="ALWAYS">
+                </TableView>
+                <HBox fx:id="progressBarContainer" spacing="10.0">
+                    <Label text="ProgressBar:"/>
+                    <ProgressBar fx:id="dataProgressBar" prefWidth="200.0" progress="0.0">
+                    </ProgressBar>
+                </HBox>
+            </VBox>
         </SplitPane>
     </center>
 </BorderPane>
