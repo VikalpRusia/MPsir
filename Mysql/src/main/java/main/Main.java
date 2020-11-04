@@ -64,7 +64,8 @@ public class Main extends Application {
         primaryStage.setTitle("MY WORKBENCH");
         primaryStage.setScene(new Scene(loader.load()));
         Controller controller = loader.getController();
-        controller.initData(database);
+        controller.setDatabase(database);
+        controller.initData();
         Screen screen = Screen.getPrimary();
         Rectangle2D bounds = screen.getVisualBounds();
         primaryStage.setWidth(bounds.getWidth());

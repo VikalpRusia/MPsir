@@ -63,27 +63,30 @@ public class Database implements AutoCloseable {
         return columns;
     }
 
-    public void dropDatabase(String databaseName) throws SQLException {
+    public int dropDatabase(String databaseName) throws SQLException {
         Statement cursor = conn.createStatement();
-        cursor.execute("DROP DATABASE " + databaseName);
+        int effectedRow = cursor.executeUpdate("DROP DATABASE " + databaseName);
         cursor.close();
+        return effectedRow;
     }
 
-    public void createDatabase(String databaseName) throws SQLException {
+    public int createDatabase(String databaseName) throws SQLException {
         Statement cursor = conn.createStatement();
-        cursor.execute("CREATE DATABASE " + databaseName);
+        int effected = cursor.executeUpdate("CREATE DATABASE " + databaseName);
         cursor.close();
+        return effected;
     }
 
-    public void dropTable(String tableName) throws SQLException {
+    public int dropTable(String tableName) throws SQLException {
         Statement cursor = conn.createStatement();
-        cursor.execute("DROP TABLE " + tableName);
+        int effected = cursor.executeUpdate("DROP TABLE " + tableName);
         cursor.close();
+        return effected;
     }
 
-    public void createTable(String tableName,
-                            List<String> name, List<String> datatype,
-                            List<String> primaryKey) throws SQLException {
+    public int createTable(String tableName,
+                           List<String> name, List<String> datatype,
+                           List<String> primaryKey) throws SQLException {
         Statement cursor = conn.createStatement();
 //        create table c(id int,primary key(id))
         StringBuilder s = new StringBuilder("CREATE TABLE " + tableName + " ( ");
@@ -109,13 +112,14 @@ public class Database implements AutoCloseable {
         }
         s.append(")");
         System.out.println(s.toString());
-        cursor.execute(s.toString());
+        int effected = cursor.executeUpdate(s.toString());
         cursor.close();
+        return effected;
 
     }
 
-    public void insertIntoTable(String tableName,
-                                List<Object> columnDatas
+    public int insertIntoTable(String tableName,
+                               List<Object> columnDatas
     ) throws SQLException {
         List<String> columnData = columnDatas.stream().map(s -> {
             if (s == null)
@@ -136,18 +140,19 @@ public class Database implements AutoCloseable {
         sb.append(")");
 //        System.out.println(sb.toString());
         PreparedStatement cursor = conn.prepareStatement(sb.toString());
-        insertion(columnData, cursor, 0);
+        return insertion(columnData, cursor, 0);
     }
 
-    private void insertion(List<String> columnData, PreparedStatement cursor, int y) throws SQLException {
+    private int insertion(List<String> columnData, PreparedStatement cursor, int y) throws SQLException {
 
         for (int i = 1; i <= columnData.size(); i++) {
 
             cursor.setString(i + y, columnData.get(i - 1));
         }
         System.out.println(cursor.toString());
-        cursor.executeUpdate();
+        int effected = cursor.executeUpdate();
         cursor.close();
+        return effected;
     }
 
 
@@ -176,7 +181,7 @@ public class Database implements AutoCloseable {
         return keys;
     }
 
-    public void deleteData(String tableName, List<String> value) throws SQLException {
+    public int deleteData(String tableName, List<String> value) throws SQLException {
 //        delete from s where id='90';
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
@@ -184,11 +189,11 @@ public class Database implements AutoCloseable {
                 .append(tableName);
         PreparedStatement cursor = conn.prepareStatement(
                 wherePrimaryKey(stringBuilder, tableName).toString());
-        insertion(value, cursor, 0);
+        return insertion(value, cursor, 0);
 
     }
 
-    public void updateData(String tableName,
+    public int updateData(String tableName,
                            String columnModified, String newValue,
                            List<String> value) throws SQLException {
 //        update c set id=1 where id='2';
@@ -203,7 +208,7 @@ public class Database implements AutoCloseable {
         PreparedStatement cursor = conn.prepareStatement(
                 wherePrimaryKey(sb, tableName).toString());
         cursor.setString(1, newValue);
-        insertion(value, cursor, 1);
+        return insertion(value, cursor, 1);
 
     }
 

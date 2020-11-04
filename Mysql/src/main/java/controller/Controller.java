@@ -1,8 +1,10 @@
 package controller;
 
+import controller.serviceProvider.Services;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -23,9 +25,11 @@ import javafx.util.StringConverter;
 import model.Database;
 
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,19 +39,35 @@ import java.util.regex.Pattern;
  */
 public class Controller {
 
-    Database database;
-    ObservableList<String> databaseList;
-    ObservableList<String> tableList;
-    Database.Column columnsList;
+    //    Database database;
+
+    Services.DatabaseListProvider databaseListProvider;
+    Services.TableListProvider tableListProvider;
+    Services.ColumnDetailsProvider columnDetailsProvider;
+    Services.PrimarykeyService primaryKeyProvider;
+    Services.DeleteDatabaseService deleteDatabaseProvider;
+    Services.DeleteTableService deleteTableProvider;
+    Services.AddDatabase createDatabase;
+    Services.CreateTable createTable;
+    Services.InsertData insertIntoTable;
+    Services.DeleteData deleteData;
+    Services.UpdateData updateData;
+    Services.DescAll descAll;
+    Services.PrimaryKeyValueProvider primaryKeyValueProvider;
+
     Map<TableColumn<ObservableList<Object>, String>, String> tableColumnName;
+    Map<String, TableColumn<ObservableList<Object>, String>> nameTableColumn;
 
     ContextMenu contextMenu_Data_Database;
     ContextMenu contextMenuDatabase;
 
     ContextMenu contextMenu_Data_Table;
     ContextMenu contextMenuTable;
+
     ContextMenu contextMenuRow;
     ContextMenu contextMenuDataRow;
+
+
     @FXML
     private ListView<String> databaseView;
     @FXML
@@ -56,51 +76,201 @@ public class Controller {
     private TableView<ObservableList<Object>> dataView;
 
     public void initialize() {
+        //ServiceProvider
+        databaseListProvider = new Services.DatabaseListProvider();
+        databaseListProvider.setOnFailed(workerStateEvent ->
+                alertShow(databaseListProvider.getException()));
+        databaseView.itemsProperty().bind(databaseListProvider.valueProperty());
+        databaseListProvider.setOnSucceeded(workerStateEvent ->
+                databaseView.getSelectionModel().select(0));
+
+        //TableList service
+        tableListProvider = new Services.TableListProvider();
+        tableListProvider.setOnFailed(workerStateEvent ->
+                alertShow(databaseListProvider.getException()));
+        tableView.itemsProperty().bind(tableListProvider.valueProperty());
+        tableListProvider.setOnSucceeded(workerStateEvent ->
+                tableView.getSelectionModel().select(0));
+
+        //PrimaryKey
+        primaryKeyProvider = new Services.PrimarykeyService();
+        primaryKeyProvider.setOnFailed(workerStateEvent ->
+                alertShow(primaryKeyProvider.getException()));
+
+        //DeleteDatabase
+        deleteDatabaseProvider = new Services.DeleteDatabaseService();
+        deleteDatabaseProvider.setOnFailed(workerStateEvent ->
+                alertShow(deleteDatabaseProvider.getException()));
+
+        //DeleteTable
+        deleteTableProvider = new Services.DeleteTableService();
+        deleteTableProvider.setOnFailed(workerStateEvent ->
+                alertShow(deleteTableProvider.getException()));
+
+        //createDatabase
+        createDatabase = new Services.AddDatabase();
+        createDatabase.setOnFailed(workerStateEvent ->
+                alertShow(createDatabase.getException()));
+
+        //createTable
+        createTable = new Services.CreateTable();
+        createTable.setOnFailed(workerStateEvent ->
+                alertShow(createTable.getException()));
+
+        //insertDataIntoTable
+        insertIntoTable = new Services.InsertData();
+        insertIntoTable.setOnFailed(workerStateEvent ->
+                alertShow(insertIntoTable.getException()));
+
+        //deleteData
+        deleteData = new Services.DeleteData();
+        deleteData.setOnFailed(workerStateEvent ->
+                alertShow(deleteData.getException()));
+
+        //updateData
+        updateData = new Services.UpdateData();
+        updateData.setOnFailed(workerStateEvent ->
+                alertShow(updateData.getException()));
+
+        //descAll
+        descAll = new Services.DescAll();
+        descAll.setOnFailed(workerStateEvent ->
+                alertShow(descAll.getException()));
+
+        //primaryKeyValueProvider
+        primaryKeyValueProvider = new Services.PrimaryKeyValueProvider();
+        primaryKeyValueProvider.setOnFailed(workerStateEvent ->
+                alertShow(primaryKeyValueProvider.getException()));
+        //columnRelated
+        columnDetailsProvider = new Services.ColumnDetailsProvider();
+        columnDetailsProvider.setOnFailed(workerStateEvent ->
+                alertShow(columnDetailsProvider.getException()));
+        columnDetailsProvider.setOnSucceeded(workerStateEvent -> {
+            primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
+            primaryKeyProvider.setOnSucceeded(workerStateEvent1 -> {
+                tableColumnName = new HashMap<>();
+                nameTableColumn = new HashMap<>();
+                int z = 0;
+                List<String> key = primaryKeyProvider.getValue();
+
+                Database.Column columnsList = columnDetailsProvider.getValue();
+                for (int i = 0; i < columnsList.getHsize(); i++) {
+                    TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>();
+                    int finalI = i;
+                    tableColumn.setCellValueFactory(
+                            observableListStringCellDataFeatures -> {
+                                Object d = observableListStringCellDataFeatures.getValue().get(finalI);
+                                if (d == null) {
+                                    return null;
+                                }
+                                return new SimpleStringProperty(
+                                        d.toString());
+                            });
+                    HBox hBox = new HBox(10);
+                    if (key != null &&
+                            z < key.size() &&
+                            columnsList.getHeading().get(i).equals(key.get(z))) {
+                        z++;
+                        ImageView img = new ImageView(new Image(getClass()
+                                .getResource("/image/primarkey.png").toExternalForm()));
+                        img.setFitWidth(15);
+                        img.setFitHeight(15);
+                        img.getStyleClass().add("primaryKey");
+                        hBox.getChildren().add(img);
+                    }
+                    Label heading = new Label(columnsList.getHeading().get(i));
+                    Label dataType = new Label(columnsList.getType().get(i));
+                    VBox textContainer = new VBox(heading, dataType);
+                    hBox.getChildren().addAll(textContainer);
+                    hBox.setAlignment(Pos.CENTER_LEFT);
+                    hBox.setMaxWidth(HBox.USE_PREF_SIZE);
+                    hBox.setMinWidth(HBox.USE_PREF_SIZE);
+                    tableColumn.setGraphic(hBox);
+                    hBox.widthProperty().addListener((observableValue, number, t1) ->
+                            tableColumn.setPrefWidth(hBox.prefWidth(-1) + 10));
+                    tableColumn.setCellFactory(updateItem());
+                    tableColumn.setOnEditCommit(t -> {
+                        updateData.setOnSucceeded(workerStateEvent2 -> {
+                            TablePosition<ObservableList<Object>, String> tablePosition = t.getTablePosition();
+//                System.out.println(tablePosition.getColumn());
+                            t.getRowValue().set(tablePosition.getColumn(), t.getNewValue());
+                            dataView.requestFocus();
+                        });
+                        updateData(t.getNewValue(), tableColumnName.get(t.getTableColumn()));
+                    });
+                    dataView.getColumns().add(tableColumn);
+                    tableColumnName.put(tableColumn, columnsList.getHeading().get(i));
+                    nameTableColumn.put(columnsList.getHeading().get(i),tableColumn);
+
+                }
+                dataView.setItems(columnsList.getColumn());
+            });
+            if (primaryKeyProvider.getState() == Worker.State.READY) {
+                primaryKeyProvider.start();
+            } else if (primaryKeyProvider.getState() == Worker.State.SUCCEEDED || primaryKeyProvider.getState() == Worker.State.FAILED) {
+                primaryKeyProvider.restart();
+            }
+
+        });
+        //Table related
         dataView.setEditable(true);
 //        dataView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        dataView.getSelectionModel().setCellSelectionEnabled(true);
+        dataView.getSelectionModel().
 
-        contextMenu_Data_Database = new ContextMenu();
-        contextMenuDatabase = new ContextMenu();
+                setCellSelectionEnabled(true);
+
+        contextMenu_Data_Database = new
+
+                ContextMenu();
+
+        contextMenuDatabase = new
+
+                ContextMenu();
+
         MenuItem addDatabase = new MenuItem("Add database");
-        addDatabase.setOnAction(actionEvent -> {
-            try {
-                addDatabase(databaseList);
-            } catch (SQLException e) {
-                alertShow(e);
-            }
-        });
+        addDatabase.setOnAction(actionEvent -> addDatabase());
         MenuItem deleteDatabase = new MenuItem("Delete database");
-        deleteDatabase.setOnAction(actionEvent -> {
-            Consumer<String> s = s1 -> {
-                try {
-                    database.dropDatabase(s1);
-                } catch (SQLException e) {
-                    alertShow(e);
+        deleteDatabase.setOnAction(actionEvent ->
+
+        {
+            BiConsumer<String, ListView<String>> s = (s1, listView) -> {
+                deleteDatabaseProvider.setDatabaseName(s1);
+                deleteDatabaseProvider.setOnSucceeded(workerStateEvent ->
+                        listView.getItems().removeAll(s1));
+                if (deleteDatabaseProvider.getState() == Worker.State.READY) {
+                    deleteDatabaseProvider.start();
+                } else if (deleteDatabaseProvider.getState() == Worker.State.SUCCEEDED || deleteDatabaseProvider.getState() == Worker.State.FAILED) {
+                    deleteDatabaseProvider.restart();
                 }
+
             };
             deletionHandling(databaseView, s);
-            if (databaseList.size() == 0) {
-                tableList.clear();
+            if (databaseView.getItems().size() == 0) {
+                tableView.getItems().clear();
                 dataView.getColumns().clear();
             }
         });
-        contextMenu_Data_Database.getItems().addAll(addDatabase, deleteDatabase);
+        contextMenu_Data_Database.getItems().
+                addAll(addDatabase, deleteDatabase);
+
         MenuItem addDatabaseEmpty = new MenuItem("Add database");
-        addDatabaseEmpty.setOnAction(actionEvent -> {
-            try {
-                addDatabase(databaseList);
-            } catch (SQLException e) {
-                alertShow(e);
-            }
-        });
-        contextMenuDatabase.getItems().addAll(addDatabaseEmpty);
+        addDatabaseEmpty.setOnAction(actionEvent -> addDatabase());
+        contextMenuDatabase.getItems().
+                addAll(addDatabaseEmpty);
 
         //table Context
-        contextMenu_Data_Table = new ContextMenu();
-        contextMenuTable = new ContextMenu();
+        contextMenu_Data_Table = new
+
+                ContextMenu();
+
+        contextMenuTable = new
+
+                ContextMenu();
+
         MenuItem addTable = new MenuItem("Add table");
-        addTable.setOnAction(tr -> {
+        addTable.setOnAction(tr ->
+
+        {
             try {
                 inputTable();
             } catch (IOException e) {
@@ -108,196 +278,166 @@ public class Controller {
             }
         });
         MenuItem deleteTable = new MenuItem("Delete table");
-        deleteTable.setOnAction(tr -> {
-            Consumer<String> consumer = s -> {
-                try {
-                    database.dropTable(s);
-                } catch (SQLException e) {
-                    alertShow(e);
+        deleteTable.setOnAction(tr ->
+
+        {
+            BiConsumer<String, ListView<String>> consumer = (s, listView) -> {
+                deleteTableProvider.setTableName(s);
+                deleteTableProvider.setOnSucceeded(workerStateEvent ->
+                        listView.getItems().removeAll(s));
+                if (deleteTableProvider.getState() == Worker.State.READY) {
+                    deleteTableProvider.start();
+                } else if (deleteTableProvider.getState() == Worker.State.SUCCEEDED || deleteTableProvider.getState() == Worker.State.FAILED) {
+                    deleteTableProvider.restart();
                 }
+
             };
             deletionHandling(tableView, consumer);
-            if (tableList.size() == 0) {
+            if (tableView.getItems().size() == 0) {
                 dataView.getColumns().clear();
             }
         });
         MenuItem primaryKey = new MenuItem("Primary Key");
-        primaryKey.setOnAction(s -> getPrimaryKey());
+        primaryKey.setOnAction(s ->
+
+                getPrimaryKey());
         MenuItem description = new MenuItem("Description");
-        description.setOnAction(s -> {
+        description.setOnAction(s ->
+
+        {
             try {
                 descriptionTable(tableView.getSelectionModel().getSelectedItem());
-            } catch (IOException | SQLException e) {
+            } catch (IOException e) {
                 alertShow(e);
             }
         });
-        contextMenu_Data_Table.getItems().addAll(addTable, deleteTable, primaryKey, description);
+        contextMenu_Data_Table.getItems().
+
+                addAll(addTable, deleteTable, primaryKey, description);
 
         MenuItem addTableEmpty = new MenuItem("Add table");
-        addTableEmpty.setOnAction(tr -> {
+        addTableEmpty.setOnAction(tr ->
+
+        {
             try {
                 inputTable();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-        contextMenuTable.getItems().addAll(addTableEmpty);
+        contextMenuTable.getItems().
+
+                addAll(addTableEmpty);
 
         //table row Context
-        contextMenuRow = new ContextMenu();
+        contextMenuRow = new
+
+                ContextMenu();
+
         MenuItem add_row = new MenuItem("Add row");
-        add_row.setOnAction(e -> inputDataInTable());
-        contextMenuRow.getItems().addAll(add_row);
+        add_row.setOnAction(e ->
+
+                inputDataInTable());
+        contextMenuRow.getItems().
+
+                addAll(add_row);
 
         //table data context
-        contextMenuDataRow = new ContextMenu();
+        contextMenuDataRow = new
+
+                ContextMenu();
+
         MenuItem add_row_Empty = new MenuItem("Add row");
-        add_row_Empty.setOnAction(e -> inputDataInTable());
+        add_row_Empty.setOnAction(e ->
+
+                inputDataInTable());
         MenuItem add_null = new MenuItem("Update to null");
-        add_null.setOnAction(z -> {
-            try {
-                TablePosition<ObservableList<Object>, String> sample = dataView.getFocusModel().getFocusedCell();
+        add_null.setOnAction(z ->
+
+        {
+            TablePosition<ObservableList<Object>, String> sample = dataView.getFocusModel().getFocusedCell();
 //            System.out.println(tableColumnName.get(sample.getTableColumn()));
-                updateToNull(tableColumnName.get(sample.getTableColumn()));
+            updateToNull(tableColumnName.get(sample.getTableColumn()));
 //            System.out.println(dataView.getFocusModel().getFocusedItem());
-                ObservableList<Object> change = dataView.getFocusModel().getFocusedItem();
-                change.set(sample.getColumn(), null);
-                columnsList.getColumn().set(sample.getRow(), change);
-                dataView.getSelectionModel().select(sample.getRow(), sample.getTableColumn());
+            ObservableList<Object> change = dataView.getFocusModel().getFocusedItem();
+            change.set(sample.getColumn(), null);
+            columnDetailsProvider.getValue().getColumn().set(sample.getRow(), change);
+            dataView.getSelectionModel().select(sample.getRow(), sample.getTableColumn());
 //            System.out.println(dataView.getFocusModel().getFocusedItem());
 
-//            columnsList.get.set(sample.getColumn(), null);
-            } catch (SQLException e) {
-                alertShow(e);
-            }
+
         });
         MenuItem delete_row = new MenuItem("Delete row");
-        delete_row.setOnAction(s -> deleteData());
-        contextMenuDataRow.getItems().addAll(add_row_Empty, add_null, delete_row);
+        delete_row.setOnAction(s ->
 
-        databaseView.getSelectionModel().selectedItemProperty().addListener((observableValue, s, t1) -> {
-            if (t1 != null) {
-                changedDatabase(t1);
-            }
-        });
-        databaseView.setCellFactory(stringListView -> contextFunction(contextMenu_Data_Database, contextMenuDatabase));
-        tableView.getSelectionModel().selectedItemProperty().addListener((observableValue, s, t1) -> {
-            if (t1 != null) {
-                changedTable(t1);
-            }
-        });
-        tableView.setCellFactory(stringListView -> contextFunction(contextMenu_Data_Table, contextMenuTable));
+                deleteData());
+        contextMenuDataRow.getItems().
+
+                addAll(add_row_Empty, add_null, delete_row);
+
+        databaseView.getSelectionModel().
+
+                selectedItemProperty().
+
+                addListener((observableValue, s, t1) ->
+
+                {
+                    if (t1 != null) {
+                        changedDatabase();
+                    }
+                });
+        databaseView.setCellFactory(stringListView ->
+
+                contextFunction(contextMenu_Data_Database, contextMenuDatabase));
+        tableView.getSelectionModel().
+
+                selectedItemProperty().
+
+                addListener((observableValue, s, t1) ->
+                        changedTable(t1));
+        tableView.setCellFactory(stringListView ->
+
+                contextFunction(contextMenu_Data_Table, contextMenuTable));
         tableView.setContextMenu(contextMenuTable);
-
-//        dataView.setRowFactory(new Callback<>() {
-//            @Override
-//            public TableRow<ObservableList<Object>> call(TableView<ObservableList<Object>> observableListTableView) {
-//                return new TableRow<>() {
-//                    @Override
-//                    protected void updateItem(ObservableList<Object> item, boolean empty) {
-//                        super.updateItem(item, empty);
-//                        if (empty || item == null) {
-//                            setItem(null);
-//                            setContextMenu(contextMenuRow);
-//                        } else {
-//                            setItem(item);
-//                            setContextMenu(contextMenuDataRow);
-//                        }
-//                    }
-//                };
-//            }
-//        });
         dataView.setContextMenu(contextMenuRow);
-    }
 
-    public void initData(Database database) {
-        this.database = database;
-        try {
-            databaseList = database.showDatabase();
-        } catch (SQLException e) {
-            alertShow(e);
-        }
-        databaseView.setItems(databaseList);
-
-        databaseView.getSelectionModel().select(0);
 
     }
 
+    public void setDatabase(Database database) {
+        Services.setDatabase(database);
+    }
 
-    public void changedDatabase(String databaseName) {
-        try {
-            tableList = database.showTables(databaseName);
-        } catch (SQLException e) {
-            alertShow(e);
+    public void initData() {
+        if (databaseListProvider.getState() == Worker.State.READY) {
+            databaseListProvider.start();
+        } else if (databaseListProvider.getState() == Worker.State.SUCCEEDED || databaseListProvider.getState() == Worker.State.FAILED) {
+            databaseListProvider.restart();
         }
-        tableView.setItems(tableList);
-        dataView.getColumns().clear();//when table changes it should be reflected in data
-        tableView.getSelectionModel().select(0);
+    }
+
+
+    public void changedDatabase() {
+        tableListProvider.setDatabaseName(
+                databaseView.getSelectionModel().getSelectedItem());
+        if (tableListProvider.getState() == Worker.State.READY) {
+            tableListProvider.start();
+        } else if (tableListProvider.getState() == Worker.State.SUCCEEDED || tableListProvider.getState() == Worker.State.FAILED) {
+            tableListProvider.restart();
+        }
     }
 
     public void changedTable(String tableName) {
         dataView.getColumns().clear();
-        tableColumnName = new HashMap<>();
-
-        List<String> key = null;
-        int z = 0;
-        try {
-            columnsList = database.showData(tableName);
-            key = database.primaryKey(tableName);
-        } catch (SQLException e) {
-            alertShow(e);
+        if (tableName == null) {
+            return;
         }
-        for (int i = 0; i < columnsList.getHsize(); i++) {
-            TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>();
-            int finalI = i;
-            tableColumn.setCellValueFactory(
-                    observableListStringCellDataFeatures -> {
-                        Object d = observableListStringCellDataFeatures.getValue().get(finalI);
-                        if (d == null) {
-                            return null;
-                        }
-                        return new SimpleStringProperty(
-                                d.toString());
-                    });
-            HBox hBox = new HBox(10);
-            if (key != null &&
-                    z < key.size() &&
-                    columnsList.getHeading().get(i).equals(key.get(z))) {
-                z++;
-                ImageView img = new ImageView(new Image(getClass()
-                        .getResource("/image/primarkey.png").toExternalForm()));
-                img.setFitWidth(15);
-                img.setFitHeight(15);
-                img.getStyleClass().add("primaryKey");
-                hBox.getChildren().add(img);
-            }
-            Label heading = new Label(columnsList.getHeading().get(i));
-            Label dataType = new Label(columnsList.getType().get(i));
-            VBox textContainer = new VBox(heading, dataType);
-            hBox.getChildren().addAll(textContainer);
-            hBox.setAlignment(Pos.CENTER_LEFT);
-            hBox.setMaxWidth(HBox.USE_PREF_SIZE);
-            hBox.setMinWidth(HBox.USE_PREF_SIZE);
-            tableColumn.setGraphic(hBox);
-            hBox.widthProperty().addListener((observableValue, number, t1) ->
-                    tableColumn.setPrefWidth(hBox.prefWidth(-1) + 10));
-            tableColumn.setCellFactory(updateItem());
-            tableColumn.setOnEditCommit(t -> {
-                try {
-                    updateData(t.getNewValue(), tableColumnName.get(t.getTableColumn()));
-                    TablePosition<ObservableList<Object>, String> tablePosition = t.getTablePosition();
-//                System.out.println(tablePosition.getColumn());
-                    t.getRowValue().set(tablePosition.getColumn(), t.getNewValue());
-                    dataView.requestFocus();
-                } catch (SQLException e) {
-                    alertShow(e);
-                }
-            });
-            dataView.getColumns().add(tableColumn);
-            tableColumnName.put(tableColumn, columnsList.getHeading().get(i));
-
+        columnDetailsProvider.setTableName(tableName);
+        if (columnDetailsProvider.getState() == Worker.State.READY) {
+            columnDetailsProvider.start();
+        } else if (columnDetailsProvider.getState() == Worker.State.SUCCEEDED || columnDetailsProvider.getState() == Worker.State.FAILED) {
+            columnDetailsProvider.restart();
         }
-        dataView.setItems(columnsList.getColumn());
 
     }
 
@@ -324,10 +464,10 @@ public class Controller {
 
     @FXML
     public void refresh() {
-        initData(database);
+        initData();
     }
 
-    public void deletionHandling(ListView<String> listView, Consumer<String> consumer) {
+    public void deletionHandling(ListView<String> listView, BiConsumer<String, ListView<String>> consumer) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.initOwner(databaseView.getScene().getWindow());
         alert.setHeaderText("You are going to delete " + listView.getSelectionModel().getSelectedItem() + " !");
@@ -335,12 +475,11 @@ public class Controller {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             String Name = listView.getSelectionModel().getSelectedItem();
-            consumer.accept(Name);
-            listView.getItems().removeAll(Name);
+            consumer.accept(Name, listView);
         }
     }
 
-    public void alertShow(Exception e) {
+    public void alertShow(Throwable e) {
         Alert error = new Alert(Alert.AlertType.ERROR);
         error.initOwner(databaseView.getScene().getWindow());
         error.setTitle("Query failed!");
@@ -349,7 +488,8 @@ public class Controller {
         error.showAndWait();
     }
 
-    public void addDatabase(ObservableList<String> databaseList) throws SQLException {
+    public void addDatabase() {
+        ObservableList<String> databaseList = databaseView.getItems();
         TextInputDialog textInputDialog = new TextInputDialog();
         textInputDialog.setTitle("Database Name");
         textInputDialog.setHeaderText("Enter database Name: ");
@@ -358,16 +498,23 @@ public class Controller {
         Optional<String> result = textInputDialog.showAndWait();
         if (result.isPresent() && !result.get().equals("")) {
             String x = result.get();
-            database.createDatabase(x);
-            Pattern pattern = Pattern.compile("^(.*?);*$");
-            Matcher matcher = pattern.matcher(x);
-            String s = null;
-            while (matcher.find()) {
-                //1
-                s = matcher.group(1).toLowerCase();
-                databaseList.addAll(s);
+            createDatabase.setDatabaseName(x);
+            createDatabase.setOnSucceeded(workerStateEvent -> {
+                Pattern pattern = Pattern.compile("^(.*?);*$");
+                Matcher matcher = pattern.matcher(x);
+                String s = null;
+                while (matcher.find()) {
+                    //1
+                    s = matcher.group(1).toLowerCase();
+                    databaseList.addAll(s);
+                }
+                databaseView.getSelectionModel().select(s);
+            });
+            if (createDatabase.getState() == Worker.State.READY) {
+                createDatabase.start();
+            } else if (createDatabase.getState() == Worker.State.SUCCEEDED || createDatabase.getState() == Worker.State.FAILED) {
+                createDatabase.restart();
             }
-            databaseView.getSelectionModel().select(s);
         }
     }
 
@@ -389,17 +536,18 @@ public class Controller {
                 alert.showAndWait();
                 return;
             }
-            try {
-                database.createTable(
-                        controller.getTableName(),
-                        controller.getColumnsName(),
-                        controller.getColumnsType(),
-                        controller.getPrimaryKeys()
-                );
-                tableList.add(controller.getTableName());
+            createTable.setTableName(controller.getTableName());
+            createTable.setColumnsName(controller.getColumnsName());
+            createTable.setColumnsType(controller.getColumnsType());
+            createTable.setPrimaryKeys(controller.getPrimaryKeys());
+            createTable.setOnSucceeded(workerStateEvent -> {
+                tableView.getItems().add(controller.getTableName());
                 tableView.getSelectionModel().select(controller.getTableName());
-            } catch (SQLException e) {
-                alertShow(e);
+            });
+            if (createTable.getState() == Worker.State.READY) {
+                createTable.start();
+            } else if (createTable.getState() == Worker.State.SUCCEEDED || createTable.getState() == Worker.State.FAILED) {
+                createTable.restart();
             }
 
         }
@@ -459,68 +607,115 @@ public class Controller {
             alertShow(e);
         }
         DataAddRowController controller = fxmlLoader.getController();
-        controller.setColumnsList(columnsList);
+        controller.setColumnsList(columnDetailsProvider.getValue());
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                database.insertIntoTable(tableView.getSelectionModel().getSelectedItem(),
-                        controller.values()
-                );
-                columnsList.getColumn().add(controller.values());
+            insertIntoTable.setTableName(tableView.getSelectionModel().getSelectedItem());
+            insertIntoTable.setValues(controller.values());
+            insertIntoTable.setOnSucceeded(workerStateEvent -> {
+                columnDetailsProvider.getValue().getColumn().add(controller.values());
                 dataView.getSelectionModel().clearSelection();
-//                dataView.getSelectionModel().clearAndSelect(columnsList.getColumn().size()-1);
-            } catch (SQLException e) {
-                alertShow(e);
+            });
+            if (insertIntoTable.getState() == Worker.State.READY) {
+                insertIntoTable.start();
+            } else if (insertIntoTable.getState() == Worker.State.SUCCEEDED || insertIntoTable.getState() == Worker.State.FAILED) {
+                insertIntoTable.restart();
             }
+
+//                dataView.getSelectionModel().clearAndSelect(columnsList.getColumn().size()-1);
         }
     }
 
     public void getPrimaryKey() {
         String tableName = tableView.getSelectionModel().getSelectedItem();
-        try {
-            List<String> keys = database.primaryKey(tableName);
+        primaryKeyProvider.setTableName(tableName);
+        primaryKeyProvider.setOnSucceeded(workerStateEvent -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             StringBuilder s = new StringBuilder();
+            List<String> keys = primaryKeyProvider.getValue();
             keys.forEach(s1 -> s.append(s1).append("\n"));
             alert.setHeaderText("Primary keys are !");
             alert.setContentText(s.toString());
             alert.showAndWait();
-        } catch (SQLException e) {
-            alertShow(e);
+        });
+        if (primaryKeyProvider.getState() == Worker.State.READY) {
+            primaryKeyProvider.start();
+        } else if (primaryKeyProvider.getState() == Worker.State.SUCCEEDED || primaryKeyProvider.getState() == Worker.State.FAILED) {
+            primaryKeyProvider.restart();
         }
     }
 
     public void deleteData() {
-        try {
-            List<String> values = primaryKeyValues();
-            database.deleteData(tableView.getSelectionModel().getSelectedItem(), values);
-            columnsList.getColumn().remove(dataView.getSelectionModel().getSelectedItem());
-            dataView.getSelectionModel().clearSelection();
-            dataView.requestFocus();
-        } catch (SQLException e) {
-            alertShow(e);
+        String tableName = tableView.getSelectionModel().getSelectedItem();
+        primaryKeyProvider.setTableName(tableName);
+        primaryKeyProvider.setOnSucceeded(workerStateEvent -> {
+            List<String> primaryKey = primaryKeyProvider.getValue();
+            primaryKeyValueProvider.setPrimaryKey(primaryKey);
+            primaryKeyValueProvider.setAllColumns(dataView.getColumns());
+            primaryKeyValueProvider.setNameTableColumn(nameTableColumn);
+            primaryKeyValueProvider.setObjectObservableList(dataView.getSelectionModel().getSelectedItem());
+            primaryKeyValueProvider.setOnSucceeded(workerStateEvent1 -> {
+                List<String> values = primaryKeyValueProvider.getValue();
+                deleteData.setTableName(tableName);
+                deleteData.setValues(values);
+                deleteData.setOnSucceeded(workerStateEvent2 -> {
+                    columnDetailsProvider.getValue().getColumn().remove(dataView.getSelectionModel().getSelectedItem());
+                    dataView.getSelectionModel().clearSelection();
+                    dataView.requestFocus();
+                });
+                if (deleteData.getState() == Worker.State.READY) {
+                    deleteData.start();
+                } else if (deleteData.getState() == Worker.State.SUCCEEDED || deleteData.getState() == Worker.State.FAILED) {
+                    deleteData.restart();
+                }
+            });
+            if (primaryKeyValueProvider.getState() == Worker.State.READY) {
+                primaryKeyValueProvider.start();
+            } else if (primaryKeyValueProvider.getState() == Worker.State.SUCCEEDED || primaryKeyValueProvider.getState() == Worker.State.FAILED) {
+                primaryKeyValueProvider.restart();
+            }
+
+        });
+        if (primaryKeyProvider.getState() == Worker.State.READY) {
+            primaryKeyProvider.start();
+        } else if (primaryKeyProvider.getState() == Worker.State.SUCCEEDED || primaryKeyProvider.getState() == Worker.State.FAILED) {
+            primaryKeyProvider.restart();
         }
 
     }
 
-    public void updateData(String newValue, String columnModified) throws SQLException {
-        List<String> values = primaryKeyValues();
-        database.updateData(tableView.getSelectionModel().getSelectedItem(),
-                columnModified, newValue, values);
-    }
-
-    private List<String> primaryKeyValues() throws SQLException {
-        List<Integer> primaryKeyColumns = database.positionPrimaryKey(
-                tableView.getSelectionModel().getSelectedItem()
-        );
-        List<String> values = new ArrayList<>();
-        for (Integer key : primaryKeyColumns) {
-            values.add(
-                    dataView.getSelectionModel().getSelectedItem().get(key - 1).toString()
-            );
+    private void updateData(String newValue, String columnModified) {
+        String tableName = tableView.getSelectionModel().getSelectedItem();
+        primaryKeyProvider.setTableName(tableName);
+        primaryKeyProvider.setOnSucceeded(workerStateEvent -> {
+            List<String> primaryKey = primaryKeyProvider.getValue();
+            primaryKeyValueProvider.setPrimaryKey(primaryKey);
+            primaryKeyValueProvider.setAllColumns(dataView.getColumns());
+            primaryKeyValueProvider.setNameTableColumn(nameTableColumn);
+            primaryKeyValueProvider.setObjectObservableList(dataView.getSelectionModel().getSelectedItem());
+            primaryKeyValueProvider.setOnSucceeded(workerStateEvent1 -> {
+                List<String> values = primaryKeyValueProvider.getValue();
+                updateData.setTableName(tableName);
+                updateData.setColumnModified(columnModified);
+                updateData.setNewValue(newValue);
+                updateData.setValues(values);
+                if (updateData.getState() == Worker.State.READY) {
+                    updateData.start();
+                } else if (updateData.getState() == Worker.State.SUCCEEDED || updateData.getState() == Worker.State.FAILED) {
+                    updateData.restart();
+                }
+            });
+            if (primaryKeyValueProvider.getState() == Worker.State.READY) {
+                primaryKeyValueProvider.start();
+            } else if (primaryKeyValueProvider.getState() == Worker.State.SUCCEEDED || primaryKeyValueProvider.getState() == Worker.State.FAILED) {
+                primaryKeyValueProvider.restart();
+            }
+        });
+        if (primaryKeyProvider.getState() == Worker.State.READY) {
+            primaryKeyProvider.start();
+        } else if (primaryKeyProvider.getState() == Worker.State.SUCCEEDED || primaryKeyProvider.getState() == Worker.State.FAILED) {
+            primaryKeyProvider.restart();
         }
-//        System.out.println(values);
-        return values;
     }
 
     public void description() throws IOException {
@@ -537,22 +732,34 @@ public class Controller {
 
     }
 
-    public void descriptionTable(String tableName) throws IOException, SQLException {
+    public void descriptionTable(String tableName) throws IOException {
         Stage stage = new Stage();
         stage.initOwner(databaseView.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/descriptionTable.fxml"));
         stage.setScene(new Scene(fxmlLoader.load()));
         stage.sizeToScene();
-        DescriptionTableController descController = fxmlLoader.getController();
-        descController.setData(database.descAll(tableName));
         stage.setTitle("Description of " + tableName);
+        DescriptionTableController descController = fxmlLoader.getController();
+        descAll.setOnSucceeded(workerStateEvent -> {
+            descController.setData(descAll.getValue());
+            stage.showAndWait();
+        });
+        descAll.setTableName(tableName);
+        if (descAll.getState() == Worker.State.READY) {
+            descAll.start();
+        } else if (descAll.getState() == Worker.State.SUCCEEDED || descAll.getState() == Worker.State.FAILED) {
+            descAll.restart();
+        }
+
+
 //        stage.setResizable(false);
-        stage.showAndWait();
+
     }
 
-    public void updateToNull(String columnModified) throws SQLException {
+    public void updateToNull(String columnModified) {
         updateData(null, columnModified);
     }
+
 
 }
