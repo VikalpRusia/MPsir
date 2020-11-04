@@ -4,6 +4,7 @@ import controller.serviceProvider.Services;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -200,16 +201,12 @@ public class Controller {
                     });
                     dataView.getColumns().add(tableColumn);
                     tableColumnName.put(tableColumn, columnsList.getHeading().get(i));
-                    nameTableColumn.put(columnsList.getHeading().get(i),tableColumn);
+                    nameTableColumn.put(columnsList.getHeading().get(i), tableColumn);
 
                 }
                 dataView.setItems(columnsList.getColumn());
             });
-            if (primaryKeyProvider.getState() == Worker.State.READY) {
-                primaryKeyProvider.start();
-            } else if (primaryKeyProvider.getState() == Worker.State.SUCCEEDED || primaryKeyProvider.getState() == Worker.State.FAILED) {
-                primaryKeyProvider.restart();
-            }
+            startService(primaryKeyProvider);
 
         });
         //Table related
@@ -237,11 +234,7 @@ public class Controller {
                 deleteDatabaseProvider.setDatabaseName(s1);
                 deleteDatabaseProvider.setOnSucceeded(workerStateEvent ->
                         listView.getItems().removeAll(s1));
-                if (deleteDatabaseProvider.getState() == Worker.State.READY) {
-                    deleteDatabaseProvider.start();
-                } else if (deleteDatabaseProvider.getState() == Worker.State.SUCCEEDED || deleteDatabaseProvider.getState() == Worker.State.FAILED) {
-                    deleteDatabaseProvider.restart();
-                }
+                startService(deleteDatabaseProvider);
 
             };
             deletionHandling(databaseView, s);
@@ -285,11 +278,7 @@ public class Controller {
                 deleteTableProvider.setTableName(s);
                 deleteTableProvider.setOnSucceeded(workerStateEvent ->
                         listView.getItems().removeAll(s));
-                if (deleteTableProvider.getState() == Worker.State.READY) {
-                    deleteTableProvider.start();
-                } else if (deleteTableProvider.getState() == Worker.State.SUCCEEDED || deleteTableProvider.getState() == Worker.State.FAILED) {
-                    deleteTableProvider.restart();
-                }
+                startService(deleteTableProvider);
 
             };
             deletionHandling(tableView, consumer);
@@ -409,22 +398,14 @@ public class Controller {
     }
 
     public void initData() {
-        if (databaseListProvider.getState() == Worker.State.READY) {
-            databaseListProvider.start();
-        } else if (databaseListProvider.getState() == Worker.State.SUCCEEDED || databaseListProvider.getState() == Worker.State.FAILED) {
-            databaseListProvider.restart();
-        }
+        startService(databaseListProvider);
     }
 
 
     public void changedDatabase() {
         tableListProvider.setDatabaseName(
                 databaseView.getSelectionModel().getSelectedItem());
-        if (tableListProvider.getState() == Worker.State.READY) {
-            tableListProvider.start();
-        } else if (tableListProvider.getState() == Worker.State.SUCCEEDED || tableListProvider.getState() == Worker.State.FAILED) {
-            tableListProvider.restart();
-        }
+        startService(tableListProvider);
     }
 
     public void changedTable(String tableName) {
@@ -433,11 +414,7 @@ public class Controller {
             return;
         }
         columnDetailsProvider.setTableName(tableName);
-        if (columnDetailsProvider.getState() == Worker.State.READY) {
-            columnDetailsProvider.start();
-        } else if (columnDetailsProvider.getState() == Worker.State.SUCCEEDED || columnDetailsProvider.getState() == Worker.State.FAILED) {
-            columnDetailsProvider.restart();
-        }
+        startService(columnDetailsProvider);
 
     }
 
@@ -510,11 +487,7 @@ public class Controller {
                 }
                 databaseView.getSelectionModel().select(s);
             });
-            if (createDatabase.getState() == Worker.State.READY) {
-                createDatabase.start();
-            } else if (createDatabase.getState() == Worker.State.SUCCEEDED || createDatabase.getState() == Worker.State.FAILED) {
-                createDatabase.restart();
-            }
+            startService(createDatabase);
         }
     }
 
@@ -544,11 +517,7 @@ public class Controller {
                 tableView.getItems().add(controller.getTableName());
                 tableView.getSelectionModel().select(controller.getTableName());
             });
-            if (createTable.getState() == Worker.State.READY) {
-                createTable.start();
-            } else if (createTable.getState() == Worker.State.SUCCEEDED || createTable.getState() == Worker.State.FAILED) {
-                createTable.restart();
-            }
+            startService(createTable);
 
         }
 
@@ -616,11 +585,7 @@ public class Controller {
                 columnDetailsProvider.getValue().getColumn().add(controller.values());
                 dataView.getSelectionModel().clearSelection();
             });
-            if (insertIntoTable.getState() == Worker.State.READY) {
-                insertIntoTable.start();
-            } else if (insertIntoTable.getState() == Worker.State.SUCCEEDED || insertIntoTable.getState() == Worker.State.FAILED) {
-                insertIntoTable.restart();
-            }
+            startService(insertIntoTable);
 
 //                dataView.getSelectionModel().clearAndSelect(columnsList.getColumn().size()-1);
         }
@@ -638,11 +603,7 @@ public class Controller {
             alert.setContentText(s.toString());
             alert.showAndWait();
         });
-        if (primaryKeyProvider.getState() == Worker.State.READY) {
-            primaryKeyProvider.start();
-        } else if (primaryKeyProvider.getState() == Worker.State.SUCCEEDED || primaryKeyProvider.getState() == Worker.State.FAILED) {
-            primaryKeyProvider.restart();
-        }
+        startService(primaryKeyProvider);
     }
 
     public void deleteData() {
@@ -663,24 +624,12 @@ public class Controller {
                     dataView.getSelectionModel().clearSelection();
                     dataView.requestFocus();
                 });
-                if (deleteData.getState() == Worker.State.READY) {
-                    deleteData.start();
-                } else if (deleteData.getState() == Worker.State.SUCCEEDED || deleteData.getState() == Worker.State.FAILED) {
-                    deleteData.restart();
-                }
+                startService(deleteData);
             });
-            if (primaryKeyValueProvider.getState() == Worker.State.READY) {
-                primaryKeyValueProvider.start();
-            } else if (primaryKeyValueProvider.getState() == Worker.State.SUCCEEDED || primaryKeyValueProvider.getState() == Worker.State.FAILED) {
-                primaryKeyValueProvider.restart();
-            }
+            startService(primaryKeyValueProvider);
 
         });
-        if (primaryKeyProvider.getState() == Worker.State.READY) {
-            primaryKeyProvider.start();
-        } else if (primaryKeyProvider.getState() == Worker.State.SUCCEEDED || primaryKeyProvider.getState() == Worker.State.FAILED) {
-            primaryKeyProvider.restart();
-        }
+        startService(primaryKeyProvider);
 
     }
 
@@ -699,23 +648,11 @@ public class Controller {
                 updateData.setColumnModified(columnModified);
                 updateData.setNewValue(newValue);
                 updateData.setValues(values);
-                if (updateData.getState() == Worker.State.READY) {
-                    updateData.start();
-                } else if (updateData.getState() == Worker.State.SUCCEEDED || updateData.getState() == Worker.State.FAILED) {
-                    updateData.restart();
-                }
+                startService(updateData);
             });
-            if (primaryKeyValueProvider.getState() == Worker.State.READY) {
-                primaryKeyValueProvider.start();
-            } else if (primaryKeyValueProvider.getState() == Worker.State.SUCCEEDED || primaryKeyValueProvider.getState() == Worker.State.FAILED) {
-                primaryKeyValueProvider.restart();
-            }
+            startService(primaryKeyValueProvider);
         });
-        if (primaryKeyProvider.getState() == Worker.State.READY) {
-            primaryKeyProvider.start();
-        } else if (primaryKeyProvider.getState() == Worker.State.SUCCEEDED || primaryKeyProvider.getState() == Worker.State.FAILED) {
-            primaryKeyProvider.restart();
-        }
+        startService(primaryKeyProvider);
     }
 
     public void description() throws IOException {
@@ -746,11 +683,7 @@ public class Controller {
             stage.showAndWait();
         });
         descAll.setTableName(tableName);
-        if (descAll.getState() == Worker.State.READY) {
-            descAll.start();
-        } else if (descAll.getState() == Worker.State.SUCCEEDED || descAll.getState() == Worker.State.FAILED) {
-            descAll.restart();
-        }
+        startService(descAll);
 
 
 //        stage.setResizable(false);
@@ -759,6 +692,16 @@ public class Controller {
 
     public void updateToNull(String columnModified) {
         updateData(null, columnModified);
+    }
+
+    private void startService(Service<?> service) {
+        if (service.getState() == Worker.State.READY) {
+            service.start();
+        } else if (service.getState() == Worker.State.SUCCEEDED
+                || service.getState() == Worker.State.FAILED
+        ) {
+            service.restart();
+        }
     }
 
 
