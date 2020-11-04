@@ -171,31 +171,21 @@ public class Database implements AutoCloseable {
         return keys;
     }
 
-    public List<Integer> positionPrimaryKey(String tableName) throws SQLException {
-        Statement statement = conn.createStatement();
-        ResultSet resultSet = statement.executeQuery("SHOW KEYS FROM " + tableName + " WHERE Key_name = 'PRIMARY'");
-        List<Integer> keys = new ArrayList<>();
-        while (resultSet.next()) {
-            keys.add(resultSet.getInt(4));
-        }
-        return keys;
-    }
-
-    public int deleteData(String tableName, List<String> value) throws SQLException {
+    public int deleteData(String tableName, List<String> value,List<String> primaryKey) throws SQLException {
 //        delete from s where id='90';
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder
                 .append("DELETE FROM ")
                 .append(tableName);
         PreparedStatement cursor = conn.prepareStatement(
-                wherePrimaryKey(stringBuilder, tableName).toString());
+                wherePrimaryKey(stringBuilder,primaryKey).toString());
         return insertion(value, cursor, 0);
 
     }
 
     public int updateData(String tableName,
-                           String columnModified, String newValue,
-                           List<String> value) throws SQLException {
+                          String columnModified, String newValue,
+                          List<String> value, List<String> primaryKey) throws SQLException {
 //        update c set id=1 where id='2';
         StringBuilder sb = new StringBuilder();
         sb.append("UPDATE ")
@@ -206,15 +196,14 @@ public class Database implements AutoCloseable {
                 .append("?");
 
         PreparedStatement cursor = conn.prepareStatement(
-                wherePrimaryKey(sb, tableName).toString());
+                wherePrimaryKey(sb, primaryKey).toString());
         cursor.setString(1, newValue);
         return insertion(value, cursor, 1);
 
     }
 
-    private StringBuilder wherePrimaryKey(StringBuilder sb, String tableName) throws SQLException {
+    private StringBuilder wherePrimaryKey(StringBuilder sb, List<String> strings) throws SQLException {
         sb.append(" WHERE");
-        List<String> strings = primaryKey(tableName);
         for (int i = 0; i < strings.size(); i++) {
             sb.append(" ")
                     .append(strings.get(i))
