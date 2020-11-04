@@ -3,6 +3,7 @@ package controller.serviceProvider;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import model.Database;
 
@@ -75,6 +76,11 @@ public class Services {
 
     public static class ColumnDetailsProvider extends Service<Database.Column> {
         String tableName;
+        ProgressBar progressBar;
+
+        public void setProgressBar(ProgressBar progressBar) {
+            this.progressBar = progressBar;
+        }
 
         public void setTableName(String tableName) {
             this.tableName = tableName;
@@ -86,7 +92,7 @@ public class Services {
                 @Override
                 protected Database.Column call() throws Exception {
 
-                    return database.showData(tableName);
+                    return database.showData(tableName, progressBar);
 
                 }
             };
@@ -232,7 +238,7 @@ public class Services {
             return new Task<>() {
                 @Override
                 protected Integer call() throws Exception {
-                    return database.deleteData(tableName, values,primaryKey);
+                    return database.deleteData(tableName, values, primaryKey);
                 }
             };
         }
@@ -271,13 +277,13 @@ public class Services {
                 @Override
                 protected Integer call() throws Exception {
                     return database.updateData(tableName,
-                            columnModified, newValue, values,primaryKey);
+                            columnModified, newValue, values, primaryKey);
                 }
             };
         }
     }
 
-    public static class DescAll extends Service<ObservableList<ObservableList<String>>>{
+    public static class DescAll extends Service<ObservableList<ObservableList<String>>> {
         String tableName;
 
         public void setTableName(String tableName) {
@@ -295,9 +301,9 @@ public class Services {
         }
     }
 
-    public static class PrimaryKeyValueProvider extends Service<List<String>>{
-        Map<String, TableColumn<ObservableList<Object>,String>> nameTableColumn;
-        ObservableList<TableColumn<ObservableList<Object>,?>> allColumns;
+    public static class PrimaryKeyValueProvider extends Service<List<String>> {
+        Map<String, TableColumn<ObservableList<Object>, String>> nameTableColumn;
+        ObservableList<TableColumn<ObservableList<Object>, ?>> allColumns;
         ObservableList<Object> objectObservableList;
         List<String> primaryKey;
 
@@ -321,9 +327,9 @@ public class Services {
         protected Task<List<String>> createTask() {
             return new Task<>() {
                 @Override
-                protected List<String> call() throws Exception {
+                protected List<String> call() {
                     List<String> value = new ArrayList<>();
-                    for (String name:primaryKey) {
+                    for (String name : primaryKey) {
                         int index = allColumns.indexOf(nameTableColumn.get(name));
                         value.add(objectObservableList.get(index).toString());
                     }

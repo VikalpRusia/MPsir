@@ -75,8 +75,17 @@ public class Controller {
     private ListView<String> tableView;
     @FXML
     private TableView<ObservableList<Object>> dataView;
+    @FXML
+    private ProgressBar dataProgressBar;
+    @FXML
+    private HBox progressBarContainer;
 
     public void initialize() {
+        //ProgressBar
+        progressBarContainer.managedProperty().bind(
+                progressBarContainer.visibleProperty());
+        progressBarContainer.visibleProperty().bind(dataProgressBar.visibleProperty());
+
         //ServiceProvider
         databaseListProvider = new Services.DatabaseListProvider();
         databaseListProvider.setOnFailed(workerStateEvent ->
@@ -414,6 +423,7 @@ public class Controller {
             return;
         }
         columnDetailsProvider.setTableName(tableName);
+        columnDetailsProvider.setProgressBar(dataProgressBar);
         startService(columnDetailsProvider);
 
     }
