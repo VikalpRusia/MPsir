@@ -52,7 +52,7 @@ public class Database implements AutoCloseable {
 
             ObservableList<String> heading = FXCollections.observableArrayList();
             int totalSize = count(tableName);
-            System.out.println(totalSize);
+//            System.out.println(totalSize);
 
             columns.setHsize(rs.getColumnCount());
             columns.setVsize(resultSet.getRow());

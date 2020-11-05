@@ -35,14 +35,17 @@
         <SplitPane dividerPositions="0.07, 0.25" BorderPane.alignment="CENTER">
             <VBox alignment="TOP_CENTER">
                 <Label text="Databases"/>
-                <ListView fx:id="databaseView" VBox.vgrow="ALWAYS"/>
+                <ListView fx:id="databaseView" VBox.vgrow="ALWAYS"
+                          onKeyPressed="#handleKeyPressedOnDatabase"/>
             </VBox>
             <VBox alignment="TOP_CENTER">
                 <Label text="Tables"/>
-                <ListView fx:id="tableView" VBox.vgrow="ALWAYS"/>
+                <ListView fx:id="tableView" VBox.vgrow="ALWAYS"
+                          onKeyPressed="#handleKeyPressedOnTable"/>
             </VBox>
             <VBox alignment="TOP_RIGHT">
-                <TableView fx:id="dataView" editable="true" VBox.vgrow="ALWAYS">
+                <TableView fx:id="dataView" editable="true" VBox.vgrow="ALWAYS"
+                           onKeyPressed="#handleKeyPressedOnData">
                 </TableView>
                 <HBox fx:id="progressBarContainer" spacing="10.0">
                     <Label text="ProgressBar:"/>

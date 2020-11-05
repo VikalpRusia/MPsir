@@ -15,6 +15,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -68,6 +72,8 @@ public class Controller {
     ContextMenu contextMenuRow;
     ContextMenu contextMenuDataRow;
 
+    final KeyCodeCombination add = new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_DOWN);
+    final KeyCodeCombination shiftFocusDataView = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.SHIFT_DOWN);
 
     @FXML
     private ListView<String> databaseView;
@@ -151,6 +157,8 @@ public class Controller {
         primaryKeyValueProvider = new Services.PrimaryKeyValueProvider();
         primaryKeyValueProvider.setOnFailed(workerStateEvent ->
                 alertShow(primaryKeyValueProvider.getException()));
+
+
         //columnRelated
         columnDetailsProvider = new Services.ColumnDetailsProvider();
         columnDetailsProvider.setOnFailed(workerStateEvent ->
@@ -214,6 +222,7 @@ public class Controller {
 
                 }
                 dataView.setItems(columnsList.getColumn());
+                dataView.getSelectionModel().select(0, dataView.getColumns().get(0));
             });
             startService(primaryKeyProvider);
 
@@ -237,21 +246,8 @@ public class Controller {
         addDatabase.setOnAction(actionEvent -> addDatabase());
         MenuItem deleteDatabase = new MenuItem("Delete database");
         deleteDatabase.setOnAction(actionEvent ->
+                deleteDatabaseFunction());
 
-        {
-            BiConsumer<String, ListView<String>> s = (s1, listView) -> {
-                deleteDatabaseProvider.setDatabaseName(s1);
-                deleteDatabaseProvider.setOnSucceeded(workerStateEvent ->
-                        listView.getItems().removeAll(s1));
-                startService(deleteDatabaseProvider);
-
-            };
-            deletionHandling(databaseView, s);
-            if (databaseView.getItems().size() == 0) {
-                tableView.getItems().clear();
-                dataView.getColumns().clear();
-            }
-        });
         contextMenu_Data_Database.getItems().
                 addAll(addDatabase, deleteDatabase);
 
@@ -274,27 +270,15 @@ public class Controller {
 
         {
             try {
-                inputTable();
+                addTableFunction();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
         MenuItem deleteTable = new MenuItem("Delete table");
         deleteTable.setOnAction(tr ->
+                deleteTableFunction());
 
-        {
-            BiConsumer<String, ListView<String>> consumer = (s, listView) -> {
-                deleteTableProvider.setTableName(s);
-                deleteTableProvider.setOnSucceeded(workerStateEvent ->
-                        listView.getItems().removeAll(s));
-                startService(deleteTableProvider);
-
-            };
-            deletionHandling(tableView, consumer);
-            if (tableView.getItems().size() == 0) {
-                dataView.getColumns().clear();
-            }
-        });
         MenuItem primaryKey = new MenuItem("Primary Key");
         primaryKey.setOnAction(s ->
 
@@ -318,7 +302,7 @@ public class Controller {
 
         {
             try {
-                inputTable();
+                addTableFunction();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -398,8 +382,6 @@ public class Controller {
                 contextFunction(contextMenu_Data_Table, contextMenuTable));
         tableView.setContextMenu(contextMenuTable);
         dataView.setContextMenu(contextMenuRow);
-
-
     }
 
     public void setDatabase(Database database) {
@@ -501,7 +483,7 @@ public class Controller {
         }
     }
 
-    public void inputTable() throws IOException {
+    public void addTableFunction() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/createTable.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("New Table creation");
@@ -557,6 +539,7 @@ public class Controller {
                             setText(null);
                             setEditable(false);
                             setContextMenu(contextMenuRow);
+                            setOnKeyPressed(null);
                         } else if (item == null) {
                             setText("<Null>");
                             setTextFill(Color.PURPLE);
@@ -689,6 +672,7 @@ public class Controller {
         stage.setScene(new Scene(fxmlLoader.load()));
         stage.sizeToScene();
         stage.setTitle("Description of " + tableName);
+
         DescriptionTableController descController = fxmlLoader.getController();
         descAll.setOnSucceeded(workerStateEvent -> {
             descController.setData(descAll.getValue());
@@ -697,8 +681,6 @@ public class Controller {
         descAll.setTableName(tableName);
         startService(descAll);
 
-
-//        stage.setResizable(false);
 
     }
 
@@ -716,5 +698,69 @@ public class Controller {
         }
     }
 
+    //deleteDatabase
+    public void deleteDatabaseFunction() {
+        BiConsumer<String, ListView<String>> s = (s1, listView) -> {
+            deleteDatabaseProvider.setDatabaseName(s1);
+            deleteDatabaseProvider.setOnSucceeded(workerStateEvent ->
+                    listView.getItems().removeAll(s1));
+            startService(deleteDatabaseProvider);
 
+        };
+        deletionHandling(databaseView, s);
+        if (databaseView.getItems().size() == 0) {
+            tableView.getItems().clear();
+            dataView.getColumns().clear();
+        }
+    }
+
+    //KeyEvent delete/drop database
+    @FXML
+    public void handleKeyPressedOnDatabase(KeyEvent e) {
+        if (e.getCode().equals(KeyCode.DELETE)) {
+            deleteDatabaseFunction();
+        } else if (add.match(e)) {
+            addDatabase();
+        }
+    }
+
+    //Delete Table
+    public void deleteTableFunction() {
+        BiConsumer<String, ListView<String>> consumer = (s, listView) -> {
+            deleteTableProvider.setTableName(s);
+            deleteTableProvider.setOnSucceeded(workerStateEvent ->
+                    listView.getItems().removeAll(s));
+            startService(deleteTableProvider);
+
+        };
+        deletionHandling(tableView, consumer);
+        if (tableView.getItems().size() == 0) {
+            dataView.getColumns().clear();
+        }
+    }
+
+    //KeyEvent delete/drop table
+    @FXML
+    public void handleKeyPressedOnTable(KeyEvent e) throws IOException {
+        if (e.getCode().equals(KeyCode.DELETE)) {
+            deleteDatabaseFunction();
+        } else if (add.match(e)) {
+            addTableFunction();
+        }
+    }
+
+    //KeyEvent delete/del data
+    @FXML
+    public void handleKeyPressedOnData(KeyEvent keyEvent) {
+        if (keyEvent.getCode().equals(KeyCode.DELETE)) {
+            ObservableList<Object> selectedItem = dataView.getSelectionModel().getSelectedItem();
+            if (selectedItem != null) {
+                deleteData();
+            }
+        } else if (add.match(keyEvent)) {
+            inputDataInTable();
+        } else if (shiftFocusDataView.match(keyEvent)) {
+            tableView.requestFocus();
+        }
+    }
 }
