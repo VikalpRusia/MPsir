@@ -74,6 +74,8 @@ public class Controller {
 
     final KeyCodeCombination add = new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_DOWN);
     final KeyCodeCombination shiftFocusDataView = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.SHIFT_DOWN);
+    final KeyCodeCombination showPrimaryKey = new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN);
+    final KeyCodeCombination showDescriptionKey = new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN);
 
     @FXML
     private ListView<String> databaseView;
@@ -96,6 +98,7 @@ public class Controller {
         databaseListProvider = new Services.DatabaseListProvider();
         databaseListProvider.setOnFailed(workerStateEvent ->
                 alertShow(databaseListProvider.getException()));
+
         databaseView.itemsProperty().bind(databaseListProvider.valueProperty());
         databaseListProvider.setOnSucceeded(workerStateEvent ->
                 databaseView.getSelectionModel().select(0));
@@ -104,6 +107,7 @@ public class Controller {
         tableListProvider = new Services.TableListProvider();
         tableListProvider.setOnFailed(workerStateEvent ->
                 alertShow(databaseListProvider.getException()));
+
         tableView.itemsProperty().bind(tableListProvider.valueProperty());
         tableListProvider.setOnSucceeded(workerStateEvent ->
                 tableView.getSelectionModel().select(0));
@@ -163,8 +167,10 @@ public class Controller {
         columnDetailsProvider = new Services.ColumnDetailsProvider();
         columnDetailsProvider.setOnFailed(workerStateEvent ->
                 alertShow(columnDetailsProvider.getException()));
+
         columnDetailsProvider.setOnSucceeded(workerStateEvent -> {
             primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
+
             primaryKeyProvider.setOnSucceeded(workerStateEvent1 -> {
                 tableColumnName = new HashMap<>();
                 nameTableColumn = new HashMap<>();
@@ -229,114 +235,81 @@ public class Controller {
         });
         //Table related
         dataView.setEditable(true);
-//        dataView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        dataView.getSelectionModel().
+        dataView.getSelectionModel().setCellSelectionEnabled(true);
 
-                setCellSelectionEnabled(true);
-
-        contextMenu_Data_Database = new
-
-                ContextMenu();
-
-        contextMenuDatabase = new
-
-                ContextMenu();
+        //Database context
+        contextMenu_Data_Database = new ContextMenu();
+        contextMenuDatabase = new ContextMenu();
 
         MenuItem addDatabase = new MenuItem("Add database");
         addDatabase.setOnAction(actionEvent -> addDatabase());
-        MenuItem deleteDatabase = new MenuItem("Delete database");
-        deleteDatabase.setOnAction(actionEvent ->
-                deleteDatabaseFunction());
 
-        contextMenu_Data_Database.getItems().
-                addAll(addDatabase, deleteDatabase);
+        MenuItem deleteDatabase = new MenuItem("Delete database");
+        deleteDatabase.setOnAction(actionEvent -> deleteDatabaseFunction());
+
+        contextMenu_Data_Database.getItems().addAll(addDatabase, deleteDatabase);
 
         MenuItem addDatabaseEmpty = new MenuItem("Add database");
         addDatabaseEmpty.setOnAction(actionEvent -> addDatabase());
-        contextMenuDatabase.getItems().
-                addAll(addDatabaseEmpty);
+
+        contextMenuDatabase.getItems().addAll(addDatabaseEmpty);
 
         //table Context
-        contextMenu_Data_Table = new
-
-                ContextMenu();
-
-        contextMenuTable = new
-
-                ContextMenu();
+        contextMenu_Data_Table = new ContextMenu();
+        contextMenuTable = new ContextMenu();
 
         MenuItem addTable = new MenuItem("Add table");
-        addTable.setOnAction(tr ->
-
-        {
+        addTable.setOnAction(tr -> {
             try {
                 addTableFunction();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
+
         MenuItem deleteTable = new MenuItem("Delete table");
-        deleteTable.setOnAction(tr ->
-                deleteTableFunction());
+        deleteTable.setOnAction(tr -> deleteTableFunction());
 
         MenuItem primaryKey = new MenuItem("Primary Key");
-        primaryKey.setOnAction(s ->
+        primaryKey.setOnAction(s -> getPrimaryKey());
 
-                getPrimaryKey());
         MenuItem description = new MenuItem("Description");
-        description.setOnAction(s ->
-
-        {
+        description.setOnAction(s -> {
             try {
-                descriptionTable(tableView.getSelectionModel().getSelectedItem());
+                descriptionTable();
             } catch (IOException e) {
                 alertShow(e);
             }
         });
-        contextMenu_Data_Table.getItems().
 
+        contextMenu_Data_Table.getItems().
                 addAll(addTable, deleteTable, primaryKey, description);
 
         MenuItem addTableEmpty = new MenuItem("Add table");
-        addTableEmpty.setOnAction(tr ->
-
-        {
+        addTableEmpty.setOnAction(tr -> {
             try {
                 addTableFunction();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
-        contextMenuTable.getItems().
 
-                addAll(addTableEmpty);
+        contextMenuTable.getItems().addAll(addTableEmpty);
 
         //table row Context
-        contextMenuRow = new
-
-                ContextMenu();
+        contextMenuRow = new ContextMenu();
+        contextMenuDataRow = new ContextMenu();
 
         MenuItem add_row = new MenuItem("Add row");
-        add_row.setOnAction(e ->
+        add_row.setOnAction(e -> inputDataInTable());
+        contextMenuRow.getItems().addAll(add_row);
 
-                inputDataInTable());
-        contextMenuRow.getItems().
-
-                addAll(add_row);
-
-        //table data context
-        contextMenuDataRow = new
-
-                ContextMenu();
 
         MenuItem add_row_Empty = new MenuItem("Add row");
-        add_row_Empty.setOnAction(e ->
+        add_row_Empty.setOnAction(e -> inputDataInTable());
 
-                inputDataInTable());
         MenuItem add_null = new MenuItem("Update to null");
-        add_null.setOnAction(z ->
-
-        {
+        add_null.setOnAction(z -> {
             TablePosition<ObservableList<Object>, String> sample = dataView.getFocusModel().getFocusedCell();
 //            System.out.println(tableColumnName.get(sample.getTableColumn()));
             updateToNull(tableColumnName.get(sample.getTableColumn()));
@@ -346,40 +319,32 @@ public class Controller {
             columnDetailsProvider.getValue().getColumn().set(sample.getRow(), change);
             dataView.getSelectionModel().select(sample.getRow(), sample.getTableColumn());
 //            System.out.println(dataView.getFocusModel().getFocusedItem());
-
-
         });
+
         MenuItem delete_row = new MenuItem("Delete row");
-        delete_row.setOnAction(s ->
+        delete_row.setOnAction(s -> deleteData());
 
-                deleteData());
         contextMenuDataRow.getItems().
-
                 addAll(add_row_Empty, add_null, delete_row);
 
-        databaseView.getSelectionModel().
-
-                selectedItemProperty().
-
-                addListener((observableValue, s, t1) ->
-
-                {
+        databaseView.getSelectionModel()
+                .selectedItemProperty()
+                .addListener((observableValue, s, t1) -> {
                     if (t1 != null) {
                         changedDatabase();
                     }
                 });
+
         databaseView.setCellFactory(stringListView ->
-
                 contextFunction(contextMenu_Data_Database, contextMenuDatabase));
-        tableView.getSelectionModel().
 
-                selectedItemProperty().
+        tableView.getSelectionModel()
+                .selectedItemProperty()
+                .addListener((observableValue, s, t1) -> changedTable(t1));
 
-                addListener((observableValue, s, t1) ->
-                        changedTable(t1));
         tableView.setCellFactory(stringListView ->
-
                 contextFunction(contextMenu_Data_Table, contextMenuTable));
+
         tableView.setContextMenu(contextMenuTable);
         dataView.setContextMenu(contextMenuRow);
     }
@@ -664,7 +629,8 @@ public class Controller {
 
     }
 
-    public void descriptionTable(String tableName) throws IOException {
+    public void descriptionTable() throws IOException {
+        String tableName = tableView.getSelectionModel().getSelectedItem();
         Stage stage = new Stage();
         stage.initOwner(databaseView.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);
@@ -741,11 +707,19 @@ public class Controller {
 
     //KeyEvent delete/drop table
     @FXML
-    public void handleKeyPressedOnTable(KeyEvent e) throws IOException {
-        if (e.getCode().equals(KeyCode.DELETE)) {
-            deleteDatabaseFunction();
-        } else if (add.match(e)) {
-            addTableFunction();
+    public void handleKeyPressedOnTable(KeyEvent e) {
+        try {
+            if (e.getCode().equals(KeyCode.DELETE)) {
+                deleteDatabaseFunction();
+            } else if (add.match(e)) {
+                addTableFunction();
+            } else if (showPrimaryKey.match(e)) {
+                getPrimaryKey();
+            } else if (showDescriptionKey.match(e)) {
+                descriptionTable();
+            }
+        } catch (IOException exception) {
+            alertShow(exception);
         }
     }
 

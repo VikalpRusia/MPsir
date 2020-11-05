@@ -38,6 +38,7 @@ public class DataAddRowController {
         item = FXCollections.observableArrayList();
         ObservableList<Object> sample = FXCollections.observableArrayList();
         item.add(sample);
+
         for (int i = 0; i < columnsList.getHsize(); i++) {
             TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>(columnsList.getHeading().get(i));
             dataTable.getColumns().add(tableColumn);

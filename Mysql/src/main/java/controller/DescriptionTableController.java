@@ -34,6 +34,7 @@ public class DescriptionTableController {
         defaultConstraint.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().get(4)));
         extra.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().get(5)));
         tableView.setItems(data);
+
         tableView.widthProperty().addListener(observable -> {
             if (data.size() < 15) {
                 tableView.setPrefWidth(
