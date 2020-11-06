@@ -41,7 +41,8 @@
             <VBox alignment="TOP_CENTER">
                 <Label text="Tables"/>
                 <ListView fx:id="tableView" VBox.vgrow="ALWAYS"
-                          onKeyPressed="#handleKeyPressedOnTable"/>
+                          onKeyPressed="#handleKeyPressedOnTable"
+                          onMouseClicked="#handleMouseClickedEventOnTable"/>
             </VBox>
             <VBox alignment="TOP_RIGHT">
                 <TableView fx:id="dataView" editable="true" VBox.vgrow="ALWAYS"

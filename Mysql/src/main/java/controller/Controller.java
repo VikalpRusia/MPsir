@@ -15,10 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -274,13 +271,7 @@ public class Controller {
         primaryKey.setOnAction(s -> getPrimaryKey());
 
         MenuItem description = new MenuItem("Description");
-        description.setOnAction(s -> {
-            try {
-                descriptionTable();
-            } catch (IOException e) {
-                alertShow(e);
-            }
-        });
+        description.setOnAction(s -> descriptionTable());
 
         contextMenu_Data_Table.getItems().
                 addAll(addTable, deleteTable, primaryKey, description);
@@ -615,37 +606,46 @@ public class Controller {
         startService(primaryKeyProvider);
     }
 
-    public void description() throws IOException {
+    public void description() {
         Stage stage = new Stage();
         stage.initOwner(databaseView.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setResizable(false);
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/about.fxml"));
-        stage.setWidth(600);
-        stage.setHeight(600);
-        stage.setTitle("Descriptions !");
-        stage.setScene(new Scene(root));
-        stage.showAndWait();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/about.fxml"));
+            stage.setWidth(600);
+            stage.setHeight(600);
+            stage.setTitle("Descriptions !");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+        } catch (IOException e){
+            alertShow(e);
+        }
 
     }
 
-    public void descriptionTable() throws IOException {
+    public void descriptionTable() {
         String tableName = tableView.getSelectionModel().getSelectedItem();
         Stage stage = new Stage();
         stage.initOwner(databaseView.getScene().getWindow());
         stage.initModality(Modality.APPLICATION_MODAL);
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/descriptionTable.fxml"));
-        stage.setScene(new Scene(fxmlLoader.load()));
-        stage.sizeToScene();
-        stage.setTitle("Description of " + tableName);
+        try {
+            stage.setScene(new Scene(fxmlLoader.load()));
+            stage.sizeToScene();
+            stage.setTitle(tableName+" description");
+            stage.setResizable(false);
 
-        DescriptionTableController descController = fxmlLoader.getController();
-        descAll.setOnSucceeded(workerStateEvent -> {
-            descController.setData(descAll.getValue());
-            stage.showAndWait();
-        });
-        descAll.setTableName(tableName);
-        startService(descAll);
+            DescriptionTableController descController = fxmlLoader.getController();
+            descAll.setOnSucceeded(workerStateEvent -> {
+                descController.setData(descAll.getValue());
+                stage.showAndWait();
+            });
+            descAll.setTableName(tableName);
+            startService(descAll);
+        } catch (IOException e) {
+            alertShow(e);
+        }
 
 
     }
@@ -735,6 +735,14 @@ public class Controller {
             inputDataInTable();
         } else if (shiftFocusDataView.match(keyEvent)) {
             tableView.requestFocus();
+        }
+    }
+
+    //MouseEvent handle on Table
+    @FXML
+    public void handleMouseClickedEventOnTable(MouseEvent e) {
+        if (e.getClickCount() == 2) {
+            descriptionTable();
         }
     }
 }
