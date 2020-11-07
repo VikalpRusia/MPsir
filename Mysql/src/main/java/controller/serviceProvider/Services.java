@@ -10,6 +10,7 @@ import model.Database;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 public class Services {
     private Services() {
@@ -334,6 +335,72 @@ public class Services {
                         value.add(objectObservableList.get(index).toString());
                     }
                     return value;
+                }
+            };
+        }
+    }
+
+    public static class Suggestions extends Service<List<String>> {
+        private SortedSet<String> strings;
+        private String basedOn;
+        private int spaceIndex;
+
+        public void setSpaceIndex(int spaceIndex) {
+            this.spaceIndex = spaceIndex;
+        }
+
+        public void setStrings(SortedSet<String> strings) {
+            this.strings = strings;
+        }
+
+        public void setBasedOn(String basedOn) {
+            this.basedOn = basedOn;
+        }
+
+        @Override
+        protected Task<List<String>> createTask() {
+            return new Task<>() {
+                @Override
+                protected List<String> call() {
+                    StringBuilder leftSide = new StringBuilder();
+                    StringBuilder rightSide = new StringBuilder();
+                    for (int y = 0; y < basedOn.length(); y++) {
+                        if (y < spaceIndex + 1) {
+                            leftSide.append(basedOn.charAt(y));
+                        }
+                        if (y >= spaceIndex + 1) {
+                            rightSide.append(basedOn.charAt(y));
+                        }
+                    }
+                    basedOn = rightSide.toString();
+                    updateMessage(leftSide.toString());
+
+//                System.out.println(t1);
+
+                    return new ArrayList<>(
+                            strings.subSet(basedOn, basedOn + Character.MAX_VALUE));
+                }
+            };
+        }
+    }
+    public static class FilterQueryProvider extends Service<Database.Column>{
+        String tableName;
+        String whereQuery;
+
+        public void setTableName(String tableName) {
+            this.tableName = tableName;
+        }
+
+        public void setWhereQuery(String whereQuery) {
+            this.whereQuery = whereQuery;
+        }
+
+        @Override
+        protected Task<Database.Column> createTask() {
+            return new Task<>() {
+                @Override
+                protected Database.Column call() throws Exception {
+                    return database.filterQuery(tableName,whereQuery);
                 }
             };
         }

@@ -1,6 +1,7 @@
 package controller;
 
 import controller.serviceProvider.Services;
+import createdNodes.SuggestingTextField;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
@@ -27,10 +28,7 @@ import javafx.util.StringConverter;
 import model.Database;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +40,11 @@ import java.util.regex.Pattern;
 public class Controller {
 
     //    Database database;
+
+    final KeyCodeCombination add = new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_DOWN);
+    final KeyCodeCombination shiftFocusDataView = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.SHIFT_DOWN);
+    final KeyCodeCombination showPrimaryKey = new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN);
+    final KeyCodeCombination showDescriptionKey = new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN);
 
     Services.DatabaseListProvider databaseListProvider;
     Services.TableListProvider tableListProvider;
@@ -56,24 +59,17 @@ public class Controller {
     Services.UpdateData updateData;
     Services.DescAll descAll;
     Services.PrimaryKeyValueProvider primaryKeyValueProvider;
+    Services.FilterQueryProvider filterQueryProvider;
 
     Map<TableColumn<ObservableList<Object>, String>, String> tableColumnName;
     Map<String, TableColumn<ObservableList<Object>, String>> nameTableColumn;
 
     ContextMenu contextMenu_Data_Database;
     ContextMenu contextMenuDatabase;
-
     ContextMenu contextMenu_Data_Table;
     ContextMenu contextMenuTable;
-
     ContextMenu contextMenuRow;
     ContextMenu contextMenuDataRow;
-
-    final KeyCodeCombination add = new KeyCodeCombination(KeyCode.A, KeyCombination.CONTROL_DOWN);
-    final KeyCodeCombination shiftFocusDataView = new KeyCodeCombination(KeyCode.LEFT, KeyCombination.SHIFT_DOWN);
-    final KeyCodeCombination showPrimaryKey = new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN);
-    final KeyCodeCombination showDescriptionKey = new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN);
-
     @FXML
     private ListView<String> databaseView;
     @FXML
@@ -84,6 +80,8 @@ public class Controller {
     private ProgressBar dataProgressBar;
     @FXML
     private HBox progressBarContainer;
+    @FXML
+    private SuggestingTextField whereQuery;
 
     public void initialize() {
         //ProgressBar
@@ -159,6 +157,23 @@ public class Controller {
         primaryKeyValueProvider.setOnFailed(workerStateEvent ->
                 alertShow(primaryKeyValueProvider.getException()));
 
+        //whereQuery
+        List<String> strings = Arrays.asList("AND", "OR", "LIKE", "NOT", "NULL");
+        whereQuery.getStrings().addAll(strings);
+
+        //filterQuery
+        filterQueryProvider = new Services.FilterQueryProvider();
+        filterQueryProvider.setOnFailed(workerStateEvent ->
+                alertShow(filterQueryProvider.getException()));
+
+        filterQueryProvider.setOnSucceeded(workerStateEvent -> {
+            primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
+
+            primaryKeyProvider.setOnSucceeded(workerStateEvent1 ->
+                    tableColumnArrangement(filterQueryProvider, primaryKeyProvider));
+            startService(primaryKeyProvider);
+        });
+
 
         //columnRelated
         columnDetailsProvider = new Services.ColumnDetailsProvider();
@@ -168,65 +183,8 @@ public class Controller {
         columnDetailsProvider.setOnSucceeded(workerStateEvent -> {
             primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
 
-            primaryKeyProvider.setOnSucceeded(workerStateEvent1 -> {
-                tableColumnName = new HashMap<>();
-                nameTableColumn = new HashMap<>();
-                int z = 0;
-                List<String> key = primaryKeyProvider.getValue();
-
-                Database.Column columnsList = columnDetailsProvider.getValue();
-                for (int i = 0; i < columnsList.getHsize(); i++) {
-                    TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>();
-                    int finalI = i;
-                    tableColumn.setCellValueFactory(
-                            observableListStringCellDataFeatures -> {
-                                Object d = observableListStringCellDataFeatures.getValue().get(finalI);
-                                if (d == null) {
-                                    return null;
-                                }
-                                return new SimpleStringProperty(
-                                        d.toString());
-                            });
-                    HBox hBox = new HBox(10);
-                    if (key != null &&
-                            z < key.size() &&
-                            columnsList.getHeading().get(i).equals(key.get(z))) {
-                        z++;
-                        ImageView img = new ImageView(new Image(getClass()
-                                .getResource("/image/primarkey.png").toExternalForm()));
-                        img.setFitWidth(15);
-                        img.setFitHeight(15);
-                        img.getStyleClass().add("primaryKey");
-                        hBox.getChildren().add(img);
-                    }
-                    Label heading = new Label(columnsList.getHeading().get(i));
-                    Label dataType = new Label(columnsList.getType().get(i));
-                    VBox textContainer = new VBox(heading, dataType);
-                    hBox.getChildren().addAll(textContainer);
-                    hBox.setAlignment(Pos.CENTER_LEFT);
-                    hBox.setMaxWidth(HBox.USE_PREF_SIZE);
-                    hBox.setMinWidth(HBox.USE_PREF_SIZE);
-                    tableColumn.setGraphic(hBox);
-                    hBox.widthProperty().addListener((observableValue, number, t1) ->
-                            tableColumn.setPrefWidth(hBox.prefWidth(-1) + 10));
-                    tableColumn.setCellFactory(updateItem());
-                    tableColumn.setOnEditCommit(t -> {
-                        updateData.setOnSucceeded(workerStateEvent2 -> {
-                            TablePosition<ObservableList<Object>, String> tablePosition = t.getTablePosition();
-//                System.out.println(tablePosition.getColumn());
-                            t.getRowValue().set(tablePosition.getColumn(), t.getNewValue());
-                            dataView.requestFocus();
-                        });
-                        updateData(t.getNewValue(), tableColumnName.get(t.getTableColumn()));
-                    });
-                    dataView.getColumns().add(tableColumn);
-                    tableColumnName.put(tableColumn, columnsList.getHeading().get(i));
-                    nameTableColumn.put(columnsList.getHeading().get(i), tableColumn);
-
-                }
-                dataView.setItems(columnsList.getColumn());
-                dataView.getSelectionModel().select(0, dataView.getColumns().get(0));
-            });
+            primaryKeyProvider.setOnSucceeded(workerStateEvent1 ->
+                    tableColumnArrangement(columnDetailsProvider, primaryKeyProvider));
             startService(primaryKeyProvider);
 
         });
@@ -356,6 +314,7 @@ public class Controller {
         tableListProvider.setDatabaseName(
                 databaseView.getSelectionModel().getSelectedItem());
         startService(tableListProvider);
+        whereQuery.clear();
     }
 
     public void changedTable(String tableName) {
@@ -366,7 +325,7 @@ public class Controller {
         columnDetailsProvider.setTableName(tableName);
         columnDetailsProvider.setProgressBar(dataProgressBar);
         startService(columnDetailsProvider);
-
+        whereQuery.clear();
     }
 
     private ListCell<String> contextFunction(ContextMenu contextMenu, ContextMenu contextMenuEmpty) {
@@ -747,5 +706,78 @@ public class Controller {
         if (e.getClickCount() == 2) {
             descriptionTable();
         }
+    }
+
+    public void tableColumnArrangement(Service<Database.Column> columnProvider, Service<List<String>> keyProvider) {
+        tableColumnName = new HashMap<>();
+        nameTableColumn = new HashMap<>();
+        int z = 0;
+        List<String> key = keyProvider.getValue();
+
+        Database.Column columnsList = columnProvider.getValue();
+        for (int i = 0; i < columnsList.getHsize(); i++) {
+            TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>();
+            int finalI = i;
+            tableColumn.setCellValueFactory(
+                    observableListStringCellDataFeatures -> {
+                        Object d = observableListStringCellDataFeatures.getValue().get(finalI);
+                        if (d == null) {
+                            return null;
+                        }
+                        return new SimpleStringProperty(
+                                d.toString());
+                    });
+            HBox hBox = new HBox(10);
+            if (key != null &&
+                    z < key.size() &&
+                    columnsList.getHeading().get(i).equals(key.get(z))) {
+                z++;
+                ImageView img = new ImageView(new Image(getClass()
+                        .getResource("/image/primarkey.png").toExternalForm()));
+                img.setFitWidth(15);
+                img.setFitHeight(15);
+                img.getStyleClass().add("primaryKey");
+                hBox.getChildren().add(img);
+            }
+            Label heading = new Label(columnsList.getHeading().get(i));
+            //for columnName suggestions
+            whereQuery.getStrings().add(columnsList.getHeading().get(i).toLowerCase());
+            Label dataType = new Label(columnsList.getType().get(i));
+            VBox textContainer = new VBox(heading, dataType);
+            hBox.getChildren().addAll(textContainer);
+            hBox.setAlignment(Pos.CENTER_LEFT);
+            hBox.setMaxWidth(HBox.USE_PREF_SIZE);
+            hBox.setMinWidth(HBox.USE_PREF_SIZE);
+            tableColumn.setGraphic(hBox);
+            hBox.widthProperty().addListener((observableValue, number, t1) ->
+                    tableColumn.setPrefWidth(hBox.prefWidth(-1) + 10));
+            tableColumn.setCellFactory(updateItem());
+            tableColumn.setOnEditCommit(t -> {
+                updateData.setOnSucceeded(workerStateEvent2 -> {
+                    TablePosition<ObservableList<Object>, String> tablePosition = t.getTablePosition();
+//                System.out.println(tablePosition.getColumn());
+                    t.getRowValue().set(tablePosition.getColumn(), t.getNewValue());
+                    dataView.requestFocus();
+                });
+                updateData(t.getNewValue(), tableColumnName.get(t.getTableColumn()));
+            });
+            dataView.getColumns().add(tableColumn);
+            tableColumnName.put(tableColumn, columnsList.getHeading().get(i));
+            nameTableColumn.put(columnsList.getHeading().get(i), tableColumn);
+
+        }
+        dataView.setItems(columnsList.getColumn());
+        dataView.getSelectionModel().select(0, dataView.getColumns().get(0));
+    }
+    @FXML
+    public void handleKeyPressedOnSuggestion(KeyEvent event){
+        if (event.getCode().equals(KeyCode.ENTER)){
+            whereClause();
+        }
+    }
+    public void whereClause(){
+        filterQueryProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
+        filterQueryProvider.setWhereQuery(whereQuery.getText());
+        startService(filterQueryProvider);
     }
 }
