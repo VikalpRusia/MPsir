@@ -1,6 +1,8 @@
 package controller;
 
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Hyperlink;
@@ -19,6 +21,11 @@ public class DescController {
     private TextFlow textFlow;
 
 
+    ObjectProperty<Font> importantPart = new SimpleObjectProperty<>(
+            Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+    ObjectProperty<Font> heading = new SimpleObjectProperty<>(
+            Font.font("Comic Sans MS", 18));
+
     public void initialize() {
         view.selectedToggleProperty().addListener((observableValue, toggle, t1) -> {
             if (t1 == null) {
@@ -33,21 +40,44 @@ public class DescController {
 
     public void about() {
         textFlow.getChildren().clear();
+
         Text text = new Text("This is project is architected,designed and implemented by ");
-        text.setFont(Font.font("Comic Sans MS", 18));
+        text.fontProperty().bind(heading);
+
         Text author = new Text("Vikalp Rusia");
-        author.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+        author.fontProperty().bind(importantPart);
+
         textFlow.getChildren().addAll(text, author);
     }
 
     public void contact() {
         textFlow.getChildren().clear();
+
         Text text = new Text("Mail your valuable Suggestions at: ");
-        text.setFont(Font.font("Comic Sans MS", 18));
+        text.fontProperty().bind(heading);
+
         Hyperlink mail = new Hyperlink("18bcs163@ietdavv.edu.in");
-        mail.setFont(Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+        mail.fontProperty().bind(importantPart);
         mail.setOnAction(actionEvent -> HostServicesProvider.INSTANCE.getHostServices()
                 .showDocument("mailto:18bcs163@ietdavv.edu.in?subject=Feedback"));
+
         textFlow.getChildren().addAll(text, mail);
+    }
+
+    public void development() {
+        textFlow.getChildren().clear();
+
+        Text text = new Text("GitHub link of this Project: ");
+        text.fontProperty().bind(heading);
+
+        Hyperlink gitLink = new Hyperlink("https://github.com/VikalpRusia/MPsir");
+        gitLink.fontProperty().bind(importantPart);
+        gitLink.setOnAction(actionEvent -> HostServicesProvider.INSTANCE.getHostServices()
+                .showDocument("https://github.com/VikalpRusia/MPsir"));
+
+        Text endingText = new Text("\n\nHelp in the further development of this project :)");
+        endingText.fontProperty().bind(importantPart);
+
+        textFlow.getChildren().addAll(text, gitLink, endingText);
     }
 }
