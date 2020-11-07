@@ -55,7 +55,7 @@ public class Database implements AutoCloseable {
 //            System.out.println(totalSize);
 
             columns.setHsize(rs.getColumnCount());
-            columns.setVsize(resultSet.getRow());
+//            columns.setVsize(resultSet.getRow());
             for (int i = 1; i <= rs.getColumnCount(); i++) {
                 heading.add(rs.getColumnName(i));
 //            System.out.print(rs.getColumnName(i) + " ");
@@ -272,19 +272,53 @@ public class Database implements AutoCloseable {
         }
     }
 
+    public Column filterQuery(String tableName, String whereClause) throws SQLException {
+        StringBuilder sb = new StringBuilder("SELECT * FROM ");
+        sb.append(tableName)
+                .append(" WHERE ")
+                .append(whereClause);
+        System.out.println(sb.toString());
+        try (Statement statement = conn.createStatement()) {
+            Column columns = new Column();
+            ResultSet resultSet = statement.executeQuery(sb.toString());
+            ResultSetMetaData rs = resultSet.getMetaData();
+            columns.setHsize(rs.getColumnCount());
+//            columns.setVsize(resultSet.getRow());
+            ObservableList<String> heading = FXCollections.observableArrayList();
+            for (int i = 1; i <= rs.getColumnCount(); i++) {
+                heading.add(rs.getColumnName(i));
+//            System.out.print(rs.getColumnName(i) + " ");
+            }
+            columns.setHeading(heading);
+            columns.setType(descSingle(tableName, 2));
+
+            while (resultSet.next()) {
+                ObservableList<Object> observableList = FXCollections.observableArrayList();
+                for (int i = 1; i <= rs.getColumnCount(); i++) {
+                    observableList.add(resultSet.getString(i));
+                }
+                columns.add(observableList);
+            }
+            return columns;
+        }
+    }
+
     public static class Column {
         ObservableList<String> heading;
         ObservableList<ObservableList<Object>> column;
         ObservableList<String> type;
         int hsize;
-        int vsize;
 
-        public void setType(ObservableList<String> type) {
-            this.type = type;
+        public Column() {
+            column = FXCollections.observableArrayList();
         }
 
         public ObservableList<String> getType() {
             return type;
+        }
+
+        public void setType(ObservableList<String> type) {
+            this.type = type;
         }
 
         public int getHsize() {
@@ -295,10 +329,6 @@ public class Database implements AutoCloseable {
             this.hsize = hsize;
         }
 
-        public void setVsize(int vsize) {
-            this.vsize = vsize;
-        }
-
         public ObservableList<String> getHeading() {
             return heading;
         }
@@ -307,9 +337,6 @@ public class Database implements AutoCloseable {
             this.heading = heading;
         }
 
-        public Column() {
-            column = FXCollections.observableArrayList();
-        }
 
         public void add(ObservableList<Object> f) {
             column.add(f);

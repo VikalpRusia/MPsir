@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import createdNodes.SuggestingTextField?>
 <BorderPane stylesheets="@../css/sample.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controller.Controller">
     <top>
@@ -35,18 +26,19 @@
         <SplitPane dividerPositions="0.07, 0.25" BorderPane.alignment="CENTER">
             <VBox alignment="TOP_CENTER">
                 <Label text="Databases"/>
-                <ListView fx:id="databaseView" VBox.vgrow="ALWAYS"
-                          onKeyPressed="#handleKeyPressedOnDatabase"/>
+                <ListView fx:id="databaseView" onKeyPressed="#handleKeyPressedOnDatabase"
+                          VBox.vgrow="ALWAYS"/>
             </VBox>
             <VBox alignment="TOP_CENTER">
                 <Label text="Tables"/>
-                <ListView fx:id="tableView" VBox.vgrow="ALWAYS"
-                          onKeyPressed="#handleKeyPressedOnTable"
-                          onMouseClicked="#handleMouseClickedEventOnTable"/>
+                <ListView fx:id="tableView" onKeyPressed="#handleKeyPressedOnTable"
+                          onMouseClicked="#handleMouseClickedEventOnTable" VBox.vgrow="ALWAYS"/>
             </VBox>
             <VBox alignment="TOP_RIGHT">
-                <TableView fx:id="dataView" editable="true" VBox.vgrow="ALWAYS"
-                           onKeyPressed="#handleKeyPressedOnData">
+                <SuggestingTextField fx:id="whereQuery" promptText="&lt;Filter Query&gt;"
+                                     onKeyPressed="#handleKeyPressedOnSuggestion"/>
+                <TableView fx:id="dataView" editable="true"
+                           onKeyPressed="#handleKeyPressedOnData" VBox.vgrow="ALWAYS">
                 </TableView>
                 <HBox fx:id="progressBarContainer" spacing="10.0">
                     <Label text="ProgressBar:"/>
