@@ -315,8 +315,11 @@ public class Controller {
         MenuItem delete_row = new MenuItem("Delete row");
         delete_row.setOnAction(s -> deleteData());
 
+        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
+
+        MenuItem searchField = new MenuItem("Search Field");
         contextMenuDataRow.getItems().
-                addAll(add_row_Empty, add_null, delete_row);
+                addAll(add_row_Empty, add_null, delete_row, separatorMenuItem, searchField);
 
         databaseView.getSelectionModel()
                 .selectedItemProperty()
@@ -618,7 +621,7 @@ public class Controller {
             stage.setTitle("Descriptions !");
             stage.setScene(new Scene(root));
             stage.showAndWait();
-        } catch (IOException e){
+        } catch (IOException e) {
             alertShow(e);
         }
 
@@ -633,7 +636,7 @@ public class Controller {
         try {
             stage.setScene(new Scene(fxmlLoader.load()));
             stage.sizeToScene();
-            stage.setTitle(tableName+" description");
+            stage.setTitle(tableName + " description");
             stage.setResizable(false);
 
             DescriptionTableController descController = fxmlLoader.getController();
