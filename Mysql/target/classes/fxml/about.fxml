@@ -18,6 +18,8 @@
               AnchorPane.topAnchor="0.0">
             <ToggleButton maxHeight="-Infinity" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
                           selected="true" text="About" toggleGroup="$view" onAction="#about"/>
+            <ToggleButton maxHeight="-Infinity" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                          text="Development" toggleGroup="$view" onAction="#development"/>
             <ToggleButton maxHeight="-Infinity" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Contact"
                           toggleGroup="$view" onAction="#contact"/>
         </VBox>

@@ -32,7 +32,7 @@
         </MenuBar>
     </top>
     <center>
-        <SplitPane dividerPositions="0.07, 0.25" BorderPane.alignment="CENTER">
+        <SplitPane fx:id="splitPane" dividerPositions="0.07, 0.25" BorderPane.alignment="CENTER">
             <VBox alignment="TOP_CENTER">
                 <Label text="Databases"/>
                 <ListView fx:id="databaseView" VBox.vgrow="ALWAYS"
