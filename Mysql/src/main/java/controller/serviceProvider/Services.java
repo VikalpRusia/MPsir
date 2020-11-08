@@ -7,10 +7,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import model.Database;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
+import java.util.*;
 
 public class Services {
     private Services() {
@@ -374,16 +371,22 @@ public class Services {
                     }
                     basedOn = rightSide.toString();
                     updateMessage(leftSide.toString());
+                    updateTitle(basedOn);
 
 //                System.out.println(t1);
 
-                    return new ArrayList<>(
-                            strings.subSet(basedOn, basedOn + Character.MAX_VALUE));
+
+                    ArrayList<String> arrayList = new ArrayList<>(
+                            strings.subSet(basedOn.toLowerCase(), basedOn.toLowerCase() + Character.MAX_VALUE));
+
+                    arrayList.addAll(strings.subSet(basedOn.toUpperCase(),basedOn.toUpperCase()+Character.MAX_VALUE));
+                    return arrayList;
                 }
             };
         }
     }
-    public static class FilterQueryProvider extends Service<Database.Column>{
+
+    public static class FilterQueryProvider extends Service<Database.Column> {
         String tableName;
         String whereQuery;
 
@@ -400,7 +403,7 @@ public class Services {
             return new Task<>() {
                 @Override
                 protected Database.Column call() throws Exception {
-                    return database.filterQuery(tableName,whereQuery);
+                    return database.filterQuery(tableName, whereQuery);
                 }
             };
         }
