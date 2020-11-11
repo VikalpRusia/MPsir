@@ -179,9 +179,17 @@ public class Database implements AutoCloseable {
         conn.close();
     }
 
-    public List<String> primaryKey(String tableName) throws SQLException {
+    public List<String> primaryKey(String tableName, Boolean isPrimaryOrForeign) throws SQLException {
+        String whereClause;
+        if (isPrimaryOrForeign == null) {
+            whereClause = "";
+        } else if (isPrimaryOrForeign) {
+            whereClause = " WHERE Key_name = 'PRIMARY'";
+        } else {
+            whereClause = " WHERE Key_name != 'PRIMARY'";
+        }
         try (Statement statement = conn.createStatement();
-             ResultSet resultSet = statement.executeQuery("SHOW KEYS FROM " + tableName + " WHERE Key_name = 'PRIMARY'")
+             ResultSet resultSet = statement.executeQuery("SHOW KEYS FROM " + tableName + whereClause)
         ) {
             List<String> keys = new ArrayList<>();
             while (resultSet.next()) {

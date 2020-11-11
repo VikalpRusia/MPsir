@@ -68,7 +68,8 @@ public class Controller {
     Services.DatabaseListProvider databaseListProvider;
     Services.TableListProvider tableListProvider;
     Services.ColumnDetailsProvider columnDetailsProvider;
-    Services.PrimaryKeyService primaryKeyProvider;
+    Services.KeyService primaryKeyProvider;
+    Services.KeyService foreignKeyProvider;
     Services.DeleteDatabaseService deleteDatabaseProvider;
     Services.DeleteTableService deleteTableProvider;
     Services.AddDatabase createDatabase;
@@ -149,9 +150,16 @@ public class Controller {
                 tableView.getSelectionModel().select(0));
 
         //PrimaryKey
-        primaryKeyProvider = new Services.PrimaryKeyService();
+        primaryKeyProvider = new Services.KeyService();
+        primaryKeyProvider.setPrimaryOrForeign(true);
         primaryKeyProvider.setOnFailed(workerStateEvent ->
                 alertShow(primaryKeyProvider.getException()));
+
+        //ForeignKey
+        foreignKeyProvider = new Services.KeyService();
+        foreignKeyProvider.setPrimaryOrForeign(false);
+        foreignKeyProvider.setOnFailed(workerStateEvent ->
+                alertShow(foreignKeyProvider.getException()));
 
         //DeleteDatabase
         deleteDatabaseProvider = new Services.DeleteDatabaseService();
@@ -204,16 +212,20 @@ public class Controller {
 
         //filterQuery
         filterQueryProvider = new Services.FilterQueryProvider();
-        filterQueryProvider.setOnFailed(workerStateEvent ->
-                alertShow(filterQueryProvider.getException()));
-
-        filterQueryProvider.setOnSucceeded(workerStateEvent -> {
-            primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
-
-            primaryKeyProvider.setOnSucceeded(workerStateEvent1 ->
-                    tableColumnArrangement(filterQueryProvider, primaryKeyProvider));
-            startService(primaryKeyProvider);
-        });
+        dataQueryProvider(filterQueryProvider);
+//        filterQueryProvider.setOnFailed(workerStateEvent ->
+//                alertShow(filterQueryProvider.getException()));
+//
+//        filterQueryProvider.setOnSucceeded(workerStateEvent -> {
+//            primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
+//
+//            primaryKeyProvider.setOnSucceeded(workerStateEvent1 ->{
+//                foreignKeyProvider.setOnSucceeded(workerStateEvent2 ->
+//                    tableColumnArrangement(filterQueryProvider, primaryKeyProvider.getValue(),foreignKeyProvider.getValue()));
+//                startService(foreignKeyProvider);
+//            });
+//            startService(primaryKeyProvider);
+//        });
 
         //changeTableName
         changeTableName = new Services.ChangeTableName();
@@ -233,17 +245,21 @@ public class Controller {
 
         //columnRelated
         columnDetailsProvider = new Services.ColumnDetailsProvider();
-        columnDetailsProvider.setOnFailed(workerStateEvent ->
-                alertShow(columnDetailsProvider.getException()));
-
-        columnDetailsProvider.setOnSucceeded(workerStateEvent -> {
-            primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
-
-            primaryKeyProvider.setOnSucceeded(workerStateEvent1 ->
-                    tableColumnArrangement(columnDetailsProvider, primaryKeyProvider));
-            startService(primaryKeyProvider);
-
-        });
+        dataQueryProvider(columnDetailsProvider);
+//        columnDetailsProvider.setOnFailed(workerStateEvent ->
+//                alertShow(columnDetailsProvider.getException()));
+//
+//        columnDetailsProvider.setOnSucceeded(workerStateEvent -> {
+//            primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
+//
+//            primaryKeyProvider.setOnSucceeded(workerStateEvent1 ->{
+//                foreignKeyProvider.setOnSucceeded(workerStateEvent2 ->
+//                        tableColumnArrangement(filterQueryProvider, primaryKeyProvider.getValue(),foreignKeyProvider.getValue()));
+//                startService(foreignKeyProvider);
+//            });
+//            startService(primaryKeyProvider);
+//
+//        });
         //Table related
         dataView.setEditable(true);
         dataView.getSelectionModel().setCellSelectionEnabled(true);
@@ -768,14 +784,15 @@ public class Controller {
         }
     }
 
-    public void tableColumnArrangement(Service<Database.Column> columnProvider, Service<List<String>> keyProvider) {
+    public void tableColumnArrangement(Database.Column columnsList,
+                                       List<String> primaryKey, List<String> foreignKey
+    ) {
         dataView.getColumns().clear();
         tableColumnName = new HashMap<>();
         nameTableColumn = new HashMap<>();
         int z = 0;
-        List<String> key = keyProvider.getValue();
+        int h = 0;
 
-        Database.Column columnsList = columnProvider.getValue();
         for (int i = 0; i < columnsList.getHsize(); i++) {
             TableColumn<ObservableList<Object>, String> tableColumn = new TableColumn<>();
             int finalI = i;
@@ -789,12 +806,23 @@ public class Controller {
                                 d.toString());
                     });
             HBox hBox = new HBox(10);
-            if (key != null &&
-                    z < key.size() &&
-                    columnsList.getHeading().get(i).equals(key.get(z))) {
+            if (primaryKey != null &&
+                    z < primaryKey.size() &&
+                    columnsList.getHeading().get(i).equals(primaryKey.get(z))) {
                 z++;
                 ImageView img = new ImageView(new Image(getClass()
-                        .getResource("/image/primarkey.png").toExternalForm()));
+                        .getResource("/image/primaryKey.png").toExternalForm()));
+                img.setFitWidth(15);
+                img.setFitHeight(15);
+                img.getStyleClass().add("primaryKey");
+                hBox.getChildren().add(img);
+            } else if (foreignKey != null &&
+                    h < foreignKey.size() &&
+                    columnsList.getHeading().get(i).equals(foreignKey.get(h))
+            ) {
+                h++;
+                ImageView img = new ImageView(new Image(getClass()
+                        .getResource("/image/foreignKey.png").toExternalForm()));
                 img.setFitWidth(15);
                 img.setFitHeight(15);
                 img.getStyleClass().add("primaryKey");
@@ -904,5 +932,38 @@ public class Controller {
                 }
             }
         }
+    }
+
+    //    filterQueryProvider.setOnFailed(workerStateEvent ->
+//    alertShow(filterQueryProvider.getException()));
+//
+//        filterQueryProvider.setOnSucceeded(workerStateEvent -> {
+//        primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
+//
+//        primaryKeyProvider.setOnSucceeded(workerStateEvent1 ->{
+//            foreignKeyProvider.setOnSucceeded(workerStateEvent2 ->
+//                    tableColumnArrangement(filterQueryProvider, primaryKeyProvider.getValue(),foreignKeyProvider.getValue()));
+//            startService(foreignKeyProvider);
+//        });
+//        startService(primaryKeyProvider);
+//    });
+    private void dataQueryProvider(Service<Database.Column> queryProvider) {
+        queryProvider.setOnFailed(workerStateEvent ->
+                alertShow(queryProvider.getException()));
+
+        queryProvider.setOnSucceeded(workerStateEvent -> {
+            primaryKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
+
+            primaryKeyProvider.setOnSucceeded(workerStateEvent1 -> {
+                foreignKeyProvider.setTableName(tableView.getSelectionModel().getSelectedItem());
+                foreignKeyProvider.setOnSucceeded(workerStateEvent2 ->
+                        tableColumnArrangement(
+                                queryProvider.getValue(), primaryKeyProvider.getValue(), foreignKeyProvider.getValue()
+                        )
+                );
+                startService(foreignKeyProvider);
+            });
+            startService(primaryKeyProvider);
+        });
     }
 }

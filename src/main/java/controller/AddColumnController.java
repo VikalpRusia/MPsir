@@ -49,6 +49,7 @@ public class AddColumnController {
         });
         getColumnNameAndType.setOnSucceeded(workerStateEvent -> {
             sample = getColumnNameAndType.getValue();
+            tableColumnName.getItems().clear();
             for (String entry : sample.keySet()) {
                 tableColumnName.getItems().add(entry);
             }

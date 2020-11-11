@@ -27,8 +27,13 @@ public class Services {
         database.setProgressDataBar(progressDataBar);
     }
 
-    public static class PrimaryKeyService extends Service<List<String>> {
+    public static class KeyService extends Service<List<String>> {
         String tableName;
+        Boolean isPrimaryOrForeign;
+
+        public void setPrimaryOrForeign(Boolean primaryOrForeign) {
+            isPrimaryOrForeign = primaryOrForeign;
+        }
 
         public void setTableName(String tableName) {
             this.tableName = tableName;
@@ -40,7 +45,7 @@ public class Services {
                 @Override
                 protected List<String> call() throws Exception {
                     return database.primaryKey(
-                            tableName
+                            tableName, isPrimaryOrForeign
                     );
                 }
             };
