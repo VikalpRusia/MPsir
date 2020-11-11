@@ -18,11 +18,16 @@ public class Database implements AutoCloseable {
     private final Connection conn;
     private final String userName;
     private final String password;
+    private ProgressBar progressDataBar;
 
     public Database(String user, String password) throws SQLException {
         this.userName = user;
         this.password = password;
         conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/", user, password);
+    }
+
+    public void setProgressDataBar(ProgressBar progressDataBar) {
+        this.progressDataBar = progressDataBar;
     }
 
     public ObservableList<String> showDatabase() throws SQLException {
@@ -50,9 +55,9 @@ public class Database implements AutoCloseable {
         }
     }
 
-    public Column showData(String tableName, ProgressBar progressBar) throws SQLException {
-        progressBar.setProgress(0);
-        progressBar.setVisible(true);
+    public Column showData(String tableName) throws SQLException {
+        progressDataBar.setProgress(0);
+        progressDataBar.setVisible(true);
         try (Statement executeTableQuery = conn.createStatement();
              ResultSet resultSet = executeTableQuery.executeQuery("SELECT * FROM " + tableName)
         ) {
@@ -77,14 +82,14 @@ public class Database implements AutoCloseable {
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
-                progressBar.setProgress((double) resultSet.getRow() / totalSize);
+                progressDataBar.setProgress((double) resultSet.getRow() / totalSize);
                 ObservableList<Object> observableList = FXCollections.observableArrayList();
                 for (int i = 1; i <= rs.getColumnCount(); i++) {
                     observableList.add(resultSet.getString(i));
                 }
                 columns.add(observableList);
             }
-            progressBar.setVisible(false);
+            progressDataBar.setVisible(false);
             return columns;
         }
     }

@@ -371,6 +371,7 @@ public class Controller {
 
     public void setDatabase(Database database) {
         Services.setDatabase(database);
+        Services.setProgressDataBar(dataProgressBar);
     }
 
     public void initData() {

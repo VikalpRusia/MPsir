@@ -19,6 +19,9 @@ public class Services {
     public static void setDatabase(Database database) {
         Services.database = database;
     }
+    public static void setProgressDataBar(ProgressBar progressDataBar){
+        database.setProgressDataBar(progressDataBar);
+    }
 
     public static class PrimaryKeyService extends Service<List<String>> {
         String tableName;
@@ -91,7 +94,7 @@ public class Services {
                 @Override
                 protected Database.Column call() throws Exception {
 
-                    return database.showData(tableName, progressBar);
+                    return database.showData(tableName);
 
                 }
             };
