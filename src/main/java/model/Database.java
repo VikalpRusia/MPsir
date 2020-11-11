@@ -65,7 +65,7 @@ public class Database implements AutoCloseable {
             Column columns = new Column();
 
             ObservableList<String> heading = FXCollections.observableArrayList();
-            int totalSize = count(tableName);
+            int totalSize = count(tableName,null);
 //            System.out.println(totalSize);
 
             columns.setHsize(rs.getColumnCount());
@@ -76,21 +76,7 @@ public class Database implements AutoCloseable {
             }
             columns.setHeading(heading);
             columns.setType(descSingle(tableName, 2));
-            while (resultSet.next()) {
-//            try {
-//                Thread.sleep(10);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-                progressDataBar.setProgress((double) resultSet.getRow() / totalSize);
-                ObservableList<Object> observableList = FXCollections.observableArrayList();
-                for (int i = 1; i <= rs.getColumnCount(); i++) {
-                    observableList.add(resultSet.getString(i));
-                }
-                columns.add(observableList);
-            }
-            progressDataBar.setVisible(false);
-            return columns;
+            return getColumn(columns, resultSet, rs, totalSize);
         }
     }
 
@@ -277,16 +263,22 @@ public class Database implements AutoCloseable {
 
     }
 
-    private int count(String tableName) throws SQLException {
-        try (Statement cursor = conn.createStatement();
-             ResultSet resultSet = cursor.executeQuery("SELECT COUNT(*) FROM " + tableName)
-        ) {
+    private int count(String tableName, String whereClause) throws SQLException {
+        try (Statement cursor = conn.createStatement()) {
+            ResultSet resultSet;
+            if (whereClause == null) {
+                resultSet = cursor.executeQuery("SELECT COUNT(*) FROM " + tableName);
+            } else {
+                resultSet = cursor.executeQuery("SELECT COUNT(*) FROM " + tableName + " WHERE " + whereClause);
+            }
             resultSet.next();
             return resultSet.getInt(1);
         }
     }
 
     public Column filterQuery(String tableName, String whereClause) throws SQLException {
+        progressDataBar.setProgress(0);
+        progressDataBar.setVisible(true);
         StringBuilder sb = new StringBuilder("SELECT * FROM ");
         sb.append(tableName)
                 .append(" WHERE ")
@@ -305,16 +297,22 @@ public class Database implements AutoCloseable {
             }
             columns.setHeading(heading);
             columns.setType(descSingle(tableName, 2));
-
-            while (resultSet.next()) {
-                ObservableList<Object> observableList = FXCollections.observableArrayList();
-                for (int i = 1; i <= rs.getColumnCount(); i++) {
-                    observableList.add(resultSet.getString(i));
-                }
-                columns.add(observableList);
-            }
-            return columns;
+            int totalSize = count(tableName, whereClause);
+            return getColumn(columns, resultSet, rs, totalSize);
         }
+    }
+
+    private Column getColumn(Column columns, ResultSet resultSet, ResultSetMetaData rs, int totalSize) throws SQLException {
+        while (resultSet.next()) {
+            progressDataBar.setProgress((double) resultSet.getRow() / totalSize);
+            ObservableList<Object> observableList = FXCollections.observableArrayList();
+            for (int i = 1; i <= rs.getColumnCount(); i++) {
+                observableList.add(resultSet.getString(i));
+            }
+            columns.add(observableList);
+        }
+        progressDataBar.setVisible(false);
+        return columns;
     }
 
     public boolean changeTableName(String oldTableName, String newTableName) throws SQLException {
@@ -358,7 +356,7 @@ public class Database implements AutoCloseable {
         }
     }
 
-    public boolean loadSavedDatabase(String databaseName,File toBeloaded) throws SQLException, InterruptedException, IOException {
+    public boolean loadSavedDatabase(String databaseName, File toBeloaded) throws SQLException, InterruptedException, IOException {
 //        mysqladmin –u [UserName] –p[Pasword] create [New_DB_Name]
 //        Get-content C:\Users\vikal\Desktop\vika\pump.sql | mysql -uroot -pvikalp vik;
         createDatabase(databaseName);
