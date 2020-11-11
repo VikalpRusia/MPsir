@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.image.Image;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import model.Database;
@@ -25,6 +26,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        primaryStage.getIcons().add( new Image(getClass()
+                .getResource("/image/applicationIcon.png").toExternalForm()));
         login(primaryStage);
     }
 
