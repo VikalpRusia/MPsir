@@ -4,14 +4,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ProgressBar;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Database implements AutoCloseable {
@@ -100,9 +96,10 @@ public class Database implements AutoCloseable {
 
     public int createTable(String tableName,
                            List<String> name, List<String> datatype,
-                           List<String> primaryKey) throws SQLException {
+                           List<String> primaryKey, Map<String,String> foreignKeys) throws SQLException {
         try (Statement cursor = conn.createStatement()) {
 //        create table c(id int,primary key(id))
+            System.out.println(foreignKeys);
             StringBuilder s = new StringBuilder("CREATE TABLE " + tableName + " ( ");
             for (int i = 0; i < name.size(); i++) {
                 s.append(name.get(i))
@@ -123,6 +120,15 @@ public class Database implements AutoCloseable {
                     }
                 }
                 s.append(" )");
+            }
+//            create table shampoo(pop int , FOREIGN KEY (pop) REFERENCES vika(id));
+            if (foreignKeys.size() > 0) {
+                for (Map.Entry<String,String> stringEntry: foreignKeys.entrySet()) {
+                    s.append(", FOREIGN KEY (")
+                            .append(stringEntry.getKey())
+                            .append(") REFERENCES ")
+                            .append(stringEntry.getValue());
+                }
             }
             s.append(")");
             System.out.println(s.toString());
@@ -341,6 +347,10 @@ public class Database implements AutoCloseable {
                 "powershell.exe", sb.toString()
         );
 //        builder.redirectErrorStream(true);
+        return processStart(builder);
+    }
+
+    private boolean processStart(ProcessBuilder builder) throws SQLException, IOException, InterruptedException {
         Process p = builder.start();
         p.getOutputStream().close();
 //        try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -374,21 +384,19 @@ public class Database implements AutoCloseable {
         ProcessBuilder builder = new ProcessBuilder(
                 "powershell.exe", sb.toString()
         );
-//        builder.redirectErrorStream(true);
-        Process p = builder.start();
-        p.getOutputStream().close();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                System.out.println(line);
+        return processStart(builder);
+    }
+
+    public Map<String, String> nameAndTypeDESC(String tableName) throws SQLException {
+        Map<String, String> map = new HashMap<>();
+        try (Statement st = conn.createStatement()) {
+            ResultSet resultSet = st.executeQuery("DESC " + tableName);
+            while (resultSet.next()) {
+                map.put(resultSet.getString(1) + " " +
+                        resultSet.getString(2), resultSet.getString(1));
             }
         }
-        if (p.waitFor() == 0) {
-            return true;
-        } else {
-            throw new SQLException(Arrays.toString(p.getErrorStream().readAllBytes()));
-        }
-
+        return map;
     }
 
     public static class Column {

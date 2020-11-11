@@ -9,13 +9,17 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class CreateTableController {
 
     private ObservableList<AddColumnInTable> tableViewData;
+    private ObservableList<String> tablePresentName;
 
     @FXML
     private TextField tableName;
@@ -28,6 +32,9 @@ public class CreateTableController {
 
     @FXML
     private TableColumn<AddColumnInTable, String> columnTypeColumn;
+
+    @FXML
+    private TableColumn<AddColumnInTable,String> foreignKey;
 
     @FXML
     private DialogPane dialogPane;
@@ -55,6 +62,7 @@ public class CreateTableController {
         columnNameColumn.setCellValueFactory(s -> new SimpleStringProperty(s.getValue().getColumnName()));
         columnTypeColumn.setCellValueFactory(s -> new SimpleStringProperty(s.getValue().getColumnType()));
         primaryKey.setCellValueFactory(s -> new SimpleStringProperty(s.getValue().isPrimaryKey().toString()));
+        foreignKey.setCellValueFactory(s -> new SimpleStringProperty(s.getValue().getForeignKey()));
         mainTableView.setItems(tableViewData);
 
     }
@@ -67,11 +75,13 @@ public class CreateTableController {
         dialog.initOwner(dialogPane.getScene().getWindow());
         dialog.setDialogPane(loader.load());
         AddColumnController controller = loader.getController();
+        controller.setTable(tablePresentName);
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             String name = controller.getColumnName();
             String type = controller.getColumnType();
             boolean isPrimary = controller.getPrimaryKey();
+            String foreignKey = controller.getForeignKey();
             if (name.equals("") || type.equals("")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText("All Fields were necessary");
@@ -79,7 +89,7 @@ public class CreateTableController {
                 alert.showAndWait();
                 return;
             }
-            tableViewData.add(new AddColumnInTable(name, type, isPrimary));
+            tableViewData.add(new AddColumnInTable(name, type, isPrimary,foreignKey));
             mainTableView.getSelectionModel().select(0);
         }
     }
@@ -101,6 +111,10 @@ public class CreateTableController {
         return tableName.getText();
     }
 
+    public void setTableName(ObservableList<String> items) {
+        tablePresentName = items;
+    }
+
     public List<String> getColumnsName() {
         return tableViewData.stream().map(AddColumnInTable::getColumnName).collect(Collectors.toList());
     }
@@ -116,16 +130,27 @@ public class CreateTableController {
                 .map(AddColumnInTable::getColumnName)
                 .collect(Collectors.toList());
     }
+    public Map<String,String> getForeignKeys(){
+        Map<String,String> map = new HashMap<>();
+        for (AddColumnInTable middle:tableViewData) {
+            if (!middle.getForeignKey().equals("false")){
+                map.put(middle.getColumnName(),middle.getForeignKey());
+            }
+        }
+        return map;
+    }
 
-    public static class AddColumnInTable {
+    static class AddColumnInTable {
         private final String columnName;
         private final String columnType;
         private final Boolean primaryKey;
+        private final String foreignKey;
 
-        public AddColumnInTable(String columnName, String columnType, boolean primaryKey) {
+        public AddColumnInTable(String columnName, String columnType, boolean primaryKey, String foreignKey) {
             this.columnName = columnName;
             this.columnType = columnType;
             this.primaryKey = primaryKey;
+            this.foreignKey = foreignKey;
         }
 
         public String getColumnName() {
@@ -138,6 +163,10 @@ public class CreateTableController {
 
         public Boolean isPrimaryKey() {
             return primaryKey;
+        }
+
+        public String getForeignKey() {
+            return foreignKey;
         }
     }
 }

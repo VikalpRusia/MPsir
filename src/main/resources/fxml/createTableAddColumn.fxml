@@ -5,9 +5,9 @@
 <?import javafx.scene.layout.*?>
 <?import java.lang.*?>
 <DialogPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controller.AddColumnController" fx:id="dialogPane">
+            fx:controller="controller.AddColumnController" fx:id="dialogPane" >
     <content>
-        <GridPane>
+        <GridPane vgap="3">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
@@ -39,12 +39,28 @@
                         <Boolean fx:value="true"/>
                         <Boolean fx:value="false"/>
                     </FXCollections>
-
                 </items>
                 <value>
                     <Boolean fx:value="false"/>
                 </value>
             </ComboBox>
+            <Label text="IS Foreign Key ?" GridPane.rowIndex="3"/>
+            <ComboBox fx:id="foreignKey" prefWidth="150.0" GridPane.columnIndex="1"
+                      GridPane.rowIndex="3">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <Boolean fx:value="true"/>
+                        <Boolean fx:value="false"/>
+                    </FXCollections>
+                </items>
+                <value>
+                    <Boolean fx:value="false"/>
+                </value>
+            </ComboBox>
+            <HBox fx:id="hBox" spacing="5" GridPane.rowIndex="4" GridPane.columnSpan="2" style="-fx-border-color: black">
+                <ComboBox fx:id="tableName" HBox.hgrow="ALWAYS" prefWidth="100"/>
+                <ComboBox fx:id="tableColumnName" HBox.hgrow="ALWAYS" prefWidth="100"/>
+            </HBox>
         </GridPane>
     </content>
 </DialogPane>

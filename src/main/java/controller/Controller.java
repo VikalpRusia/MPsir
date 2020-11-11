@@ -51,7 +51,9 @@ public class Controller {
     final KeyCodeCombination showPrimaryKey = new KeyCodeCombination(KeyCode.P, KeyCombination.CONTROL_DOWN);
     final KeyCodeCombination showDescriptionKey = new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN);
     final KeyCodeCombination shiftFocusDataViewToQueryView = new KeyCodeCombination(KeyCode.UP, KeyCombination.SHIFT_DOWN);
-
+    final FileChooser fileChooser = new FileChooser();
+    final ObjectProperty<File> initialFolder = new SimpleObjectProperty<>();
+    final Map<String, File> fileName = new HashMap<>();
     private final StringConverter<String> stringConverter = new StringConverter<>() {
         @Override
         public String toString(String s) {
@@ -63,11 +65,6 @@ public class Controller {
             return s;
         }
     };
-
-    final FileChooser fileChooser = new FileChooser();
-    final ObjectProperty<File> initialFolder = new SimpleObjectProperty<>();
-    final Map<String, File> fileName = new HashMap<>();
-
     Services.DatabaseListProvider databaseListProvider;
     Services.TableListProvider tableListProvider;
     Services.ColumnDetailsProvider columnDetailsProvider;
@@ -108,6 +105,16 @@ public class Controller {
     private HBox progressBarContainer;
     @FXML
     private SuggestingTextField whereQuery;
+
+    public static void startService(Service<?> service) {
+        if (service.getState() == Worker.State.READY) {
+            service.start();
+        } else if (service.getState() == Worker.State.SUCCEEDED
+                || service.getState() == Worker.State.FAILED
+        ) {
+            service.restart();
+        }
+    }
 
     public void initialize() {
         //fileChooser
@@ -192,7 +199,7 @@ public class Controller {
                 alertShow(primaryKeyValueProvider.getException()));
 
         //whereQuery
-        List<String> strings = Arrays.asList("AND", "IS", "OR", "LIKE", "NOT", "NULL" , "REGEX");
+        List<String> strings = Arrays.asList("AND", "IS", "OR", "LIKE", "NOT", "NULL", "REGEX");
         whereQuery.getStrings().addAll(strings);
 
         //filterQuery
@@ -290,6 +297,8 @@ public class Controller {
         MenuItem deleteTable = new MenuItem("Delete table");
         deleteTable.setOnAction(tr -> deleteTableFunction());
 
+        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
+
         MenuItem primaryKey = new MenuItem("Primary Key");
         primaryKey.setOnAction(s -> getPrimaryKey());
 
@@ -297,7 +306,7 @@ public class Controller {
         description.setOnAction(s -> descriptionTable());
 
         contextMenu_Data_Table.getItems().
-                addAll(addTable, deleteTable, primaryKey, description);
+                addAll(addTable, deleteTable, separatorMenuItem, primaryKey, description);
 
         MenuItem addTableEmpty = new MenuItem("Add table");
         addTableEmpty.setOnAction(tr -> {
@@ -338,11 +347,11 @@ public class Controller {
         MenuItem delete_row = new MenuItem("Delete row");
         delete_row.setOnAction(s -> deleteData());
 
-        SeparatorMenuItem separatorMenuItem = new SeparatorMenuItem();
+        SeparatorMenuItem separatorMenuItem1 = new SeparatorMenuItem();
 
         MenuItem searchField = new MenuItem("Search Field");
         contextMenuDataRow.getItems().
-                addAll(add_row_Empty, add_null, delete_row, separatorMenuItem, searchField);
+                addAll(add_row_Empty, add_null, delete_row, separatorMenuItem1, searchField);
 
         databaseView.getSelectionModel()
                 .selectedItemProperty()
@@ -377,7 +386,6 @@ public class Controller {
     public void initData() {
         startService(databaseListProvider);
     }
-
 
     public void changedDatabase() {
         tableListProvider.setDatabaseName(
@@ -478,6 +486,7 @@ public class Controller {
         dialog.initOwner(databaseView.getScene().getWindow());
         dialog.setDialogPane(loader.load());
         CreateTableController controller = loader.getController();
+        controller.setTableName(tableView.getItems());
         Optional<ButtonType> result = dialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             if (controller.getTableName().equals("") || controller.getColumnsName().isEmpty()
@@ -493,6 +502,7 @@ public class Controller {
             createTable.setColumnsName(controller.getColumnsName());
             createTable.setColumnsType(controller.getColumnsType());
             createTable.setPrimaryKeys(controller.getPrimaryKeys());
+            createTable.setForeignKeys(controller.getForeignKeys());
             createTable.setOnSucceeded(workerStateEvent -> {
                 tableView.getItems().add(controller.getTableName());
                 tableView.getSelectionModel().select(controller.getTableName());
@@ -533,7 +543,6 @@ public class Controller {
             }
         };
     }
-
 
     public void inputDataInTable() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/DataAddRow.fxml"));
@@ -673,16 +682,6 @@ public class Controller {
 
     public void updateToNull(String columnModified) {
         updateData(null, columnModified);
-    }
-
-    private void startService(Service<?> service) {
-        if (service.getState() == Worker.State.READY) {
-            service.start();
-        } else if (service.getState() == Worker.State.SUCCEEDED
-                || service.getState() == Worker.State.FAILED
-        ) {
-            service.restart();
-        }
     }
 
     //deleteDatabase

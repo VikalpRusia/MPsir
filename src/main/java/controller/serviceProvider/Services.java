@@ -165,6 +165,11 @@ public class Services {
         List<String> columnsName;
         List<String> columnsType;
         List<String> primaryKeys;
+        Map<String,String> foreignKeys;
+
+        public void setForeignKeys(Map<String,String> foreignKeys) {
+            this.foreignKeys = foreignKeys;
+        }
 
         public void setTableName(String tableName) {
             this.tableName = tableName;
@@ -191,7 +196,8 @@ public class Services {
                             tableName,
                             columnsName,
                             columnsType,
-                            primaryKeys
+                            primaryKeys,
+                            foreignKeys
                     );
                 }
             };
@@ -481,6 +487,24 @@ public class Services {
                 @Override
                 protected Boolean call() throws Exception {
                     return database.loadSavedDatabase(databaseName, toBeLoaded);
+                }
+            };
+        }
+    }
+
+    public static class GetColumnNameAndType extends Service<Map<String,String>> {
+        String tableName;
+
+        public void setTableName(String tableName) {
+            this.tableName = tableName;
+        }
+
+        @Override
+        protected Task<Map<String,String>> createTask() {
+            return new Task<>() {
+                @Override
+                protected Map<String, String> call() throws Exception {
+                    return database.nameAndTypeDESC(tableName);
                 }
             };
         }
