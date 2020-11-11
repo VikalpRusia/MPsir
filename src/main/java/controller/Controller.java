@@ -192,7 +192,7 @@ public class Controller {
                 alertShow(primaryKeyValueProvider.getException()));
 
         //whereQuery
-        List<String> strings = Arrays.asList("AND", "OR", "LIKE", "NOT", "NULL");
+        List<String> strings = Arrays.asList("AND", "IS", "OR", "LIKE", "NOT", "NULL");
         whereQuery.getStrings().addAll(strings);
 
         //filterQuery
