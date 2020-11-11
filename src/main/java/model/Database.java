@@ -65,7 +65,7 @@ public class Database implements AutoCloseable {
             Column columns = new Column();
 
             ObservableList<String> heading = FXCollections.observableArrayList();
-            int totalSize = count(tableName,null);
+            int totalSize = count(tableName, null);
 //            System.out.println(totalSize);
 
             columns.setHsize(rs.getColumnCount());

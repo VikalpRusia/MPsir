@@ -14,17 +14,16 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 public class DescController {
+
+    private final ObjectProperty<Font> importantPart = new SimpleObjectProperty<>(
+            Font.font("Comic Sans MS", FontWeight.BOLD, 20));
+    private final ObjectProperty<Font> heading = new SimpleObjectProperty<>(
+            Font.font("Comic Sans MS", 18));
+
     @FXML
     private ToggleGroup view;
-
     @FXML
     private TextFlow textFlow;
-
-
-    ObjectProperty<Font> importantPart = new SimpleObjectProperty<>(
-            Font.font("Comic Sans MS", FontWeight.BOLD, 20));
-    ObjectProperty<Font> heading = new SimpleObjectProperty<>(
-            Font.font("Comic Sans MS", 18));
 
     public void initialize() {
         view.selectedToggleProperty().addListener((observableValue, toggle, t1) -> {

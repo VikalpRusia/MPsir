@@ -14,6 +14,6 @@
     -fx-background-color: transparent;
 }
 
-.filter-menuitem:focused{
+.filter-menuitem:focused {
     -fx-background-color: #ffff99;
 }

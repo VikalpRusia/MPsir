@@ -24,9 +24,13 @@ public class Main extends Application {
 
     Database database;
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.getIcons().add( new Image(getClass()
+        primaryStage.getIcons().add(new Image(getClass()
                 .getResource("/image/applicationIcon.png").toExternalForm()));
         login(primaryStage);
     }
@@ -104,9 +108,5 @@ public class Main extends Application {
             alert.showAndWait();
             stop();
         }
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

@@ -8,18 +8,22 @@ import javafx.scene.control.TableColumn;
 import model.Database;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
 
 public class Services {
+    static Database database;
+
     private Services() {
     }
-
-    static Database database;
 
     public static void setDatabase(Database database) {
         Services.database = database;
     }
-    public static void setProgressDataBar(ProgressBar progressDataBar){
+
+    public static void setProgressDataBar(ProgressBar progressDataBar) {
         database.setProgressDataBar(progressDataBar);
     }
 
@@ -383,7 +387,7 @@ public class Services {
                     ArrayList<String> arrayList = new ArrayList<>(
                             strings.subSet(basedOn.toLowerCase(), basedOn.toLowerCase() + Character.MAX_VALUE));
 
-                    arrayList.addAll(strings.subSet(basedOn.toUpperCase(),basedOn.toUpperCase()+Character.MAX_VALUE));
+                    arrayList.addAll(strings.subSet(basedOn.toUpperCase(), basedOn.toUpperCase() + Character.MAX_VALUE));
                     return arrayList;
                 }
             };
@@ -413,7 +417,7 @@ public class Services {
         }
     }
 
-    public static class ChangeTableName extends Service<Boolean>{
+    public static class ChangeTableName extends Service<Boolean> {
         String oldTableName;
         String newTableName;
 
@@ -435,7 +439,8 @@ public class Services {
             };
         }
     }
-    public static class BackupDB extends Service<Boolean>{
+
+    public static class BackupDB extends Service<Boolean> {
         String databaseName;
         File toBeSavedAt;
 
@@ -452,12 +457,13 @@ public class Services {
             return new Task<>() {
                 @Override
                 protected Boolean call() throws Exception {
-                    return database.saveBackup(databaseName,toBeSavedAt);
+                    return database.saveBackup(databaseName, toBeSavedAt);
                 }
             };
         }
     }
-    public static class LoadSavedDB extends Service<Boolean>{
+
+    public static class LoadSavedDB extends Service<Boolean> {
         String databaseName;
         File toBeLoaded;
 

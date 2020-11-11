@@ -15,11 +15,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class SuggestingTextField extends TextField {
+
+    private static boolean textChangedByUser = true;
     private final SortedSet<String> strings;
     private final ContextMenu popupMenu;
     private final Services.Suggestions suggestionService = new Services.Suggestions();
     private final int count = 5;
-    private static boolean textChangedByUser = true;
 
     public SuggestingTextField() {
         super();

@@ -2,7 +2,6 @@
 
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.TableView?>
-
 <DialogPane fx:id="dialogPane" stylesheets="@../css/dataAddRow.css" xmlns="http://javafx.com/javafx/11.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.DataAddRowController">
     <content>
