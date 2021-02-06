@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<DialogPane xmlns:fx="http://javafx.com/fxml/1" fx:id="dialogPane" stylesheets="@../css/createTable.css"
+            xmlns="http://javafx.com/javafx/11.0.1" fx:controller="controller.CreateTableController">
+    <content>
+        <VBox>
+            <HBox>
+                <GridPane hgap="15.0" HBox.hgrow="ALWAYS">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                    </rowConstraints>
+                    <Label text="Table:"/>
+                    <TextField fx:id="tableName" promptText="table_name" GridPane.rowIndex="1"/>
+                    <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" promptText="Add Comment"/>
+                    <Label text="Comment:" GridPane.columnIndex="1"/>
+                </GridPane>
+            </HBox>
+            <TabPane tabClosingPolicy="UNAVAILABLE">
+                <Tab text="Columns: ">
+                    <HBox>
+                        <VBox id="mainContainerColumn" HBox.hgrow="ALWAYS">
+                            <HBox>
+                                <TableView fx:id="mainTableView" prefHeight="350.0" prefWidth="569.0">
+                                    <columns>
+                                        <TableColumn fx:id="columnNameColumn" maxWidth="125.0" minWidth="125.0"
+                                                     prefWidth="125.0" text="Column Name"/>
+                                        <TableColumn fx:id="columnTypeColumn" maxWidth="50.0" minWidth="50.0"
+                                                     prefWidth="50.0" text="Type"/>
+                                        <TableColumn fx:id="primaryKey" maxWidth="75.0" minWidth="75.0"
+                                                     prefWidth="75.0" text="Primary Key"/>
+                                        <TableColumn fx:id="foreignKey" maxWidth="85.0" minWidth="85.0"
+                                                     prefWidth="85.0" text="Foreign Key"/>
+                                        <TableColumn fx:id="uniqueKey" maxWidth="70.0" minWidth="70.0"
+                                                     prefWidth="70.0" text="Unique Key"/>
+                                        <TableColumn fx:id="notNull" maxWidth="60.0" minWidth="60.0"
+                                                     prefWidth="60.0" text="Not Null"/>
+                                        <TableColumn fx:id="autoIncrement" maxWidth="100.0" minWidth="100.0"
+                                                     prefWidth="100.0" text="Auto Increment"/>
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                    </columnResizePolicy>
+                                </TableView>
+                            </HBox>
+                        </VBox>
+                        <VBox id="imagesContainer">
+                            <HBox styleClass="operationalImage">
+                                <ImageView fx:id="additionImage" fitHeight="18.0" fitWidth="18.0"
+                                           onMouseClicked="#addImageClick" pickOnBounds="true"
+                                           preserveRatio="true">
+                                    <Image url="@../image/addition.png"/>
+                                </ImageView>
+
+                                <VBox.margin>
+                                    <Insets left="2.0" right="2.0" top="2.0"/>
+                                </VBox.margin>
+                            </HBox>
+                            <HBox styleClass="operationalImage">
+                                <ImageView fx:id="minusImage" fitHeight="18.0" fitWidth="18.0"
+                                           onMouseClicked="#minusImageClick"
+                                           pickOnBounds="true" preserveRatio="true"
+                                           styleClass="operationalImage">
+                                    <Image url="@../image/minus.png"/>
+                                </ImageView>
+                                <VBox.margin>
+                                    <Insets left="2.0" right="2.0" top="2.0"/>
+                                </VBox.margin>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                </Tab>
+                <Tab text="Indices">
+                    <SplitPane fx:id="splitPane">
+                        <AnchorPane maxWidth="120" prefWidth="120">
+                            <fx:define>
+                                <ToggleGroup fx:id="view"/>
+                            </fx:define>
+                            <VBox fx:id="toggleButtonVBox" spacing="5.0" AnchorPane.bottomAnchor="0.0"
+                                  AnchorPane.leftAnchor="0.0"
+                                  AnchorPane.rightAnchor="0.0"
+                                  AnchorPane.topAnchor="0.0" alignment="TOP_CENTER">
+                                <Label text="Content">
+                                    <font>
+                                        <Font name="System Bold"/>
+                                    </font>
+                                </Label>
+                                <padding>
+                                    <Insets top="10.0"/>
+                                </padding>
+                            </VBox>
+                        </AnchorPane>
+                        <AnchorPane>
+                            <ListView fx:id="uniquenessTogether"/>
+                            <HBox id="imagesContainer" AnchorPane.rightAnchor="90" AnchorPane.topAnchor="50">
+                                <HBox styleClass="operationalImage">
+                                    <ImageView fx:id="additionUniqueImage" fitHeight="25.0" fitWidth="25.0"
+                                               onMouseClicked="#addUniqueClick" pickOnBounds="true"
+                                               preserveRatio="true">
+                                        <Image url="@../image/addition.png"/>
+                                    </ImageView>
+
+                                    <HBox.margin>
+                                        <Insets left="5.0" right="5.0" top="5.0"/>
+                                    </HBox.margin>
+                                </HBox>
+                                <HBox styleClass="operationalImage">
+                                    <ImageView fx:id="minusUniqueImage" fitHeight="25.0" fitWidth="25.0"
+                                               onMouseClicked="#minusUniqueClick"
+                                               pickOnBounds="true" preserveRatio="true"
+                                               styleClass="operationalImage">
+                                        <Image url="@../image/minus.png"/>
+                                    </ImageView>
+                                    <HBox.margin>
+                                        <Insets left="5.0" right="5.0" top="5.0"/>
+                                    </HBox.margin>
+                                </HBox>
+                            </HBox>
+                            <VBox visible="false" fx:id="enterText" spacing="10" AnchorPane.topAnchor="200"
+                                  AnchorPane.rightAnchor="10">
+                                <Label text="Select column Name: ">
+                                    <font>
+                                        <Font name="System Bold" size="20"/>
+                                    </font>
+                                </Label>
+                                <ComboBox fx:id="columnsSelection"/>
+                                <Button text="Submit" onAction="#submit"/>
+                            </VBox>
+                        </AnchorPane>
+                    </SplitPane>
+                </Tab>
+            </TabPane>
+        </VBox>
+    </content>
+</DialogPane>

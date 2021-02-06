@@ -1,0 +1,19 @@
+.table-row-cell:empty {
+    -fx-background-color: white;
+}
+
+.table-row-cell:empty .table-cell {
+    -fx-border-width: 0px;
+}
+
+.list-cell:empty {
+    -fx-background-color: white;
+}
+
+.primaryKey {
+    -fx-background-color: transparent;
+}
+
+.filter-menuitem:focused {
+    -fx-background-color: #ffff99;
+}
