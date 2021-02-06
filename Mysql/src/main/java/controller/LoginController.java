@@ -84,6 +84,8 @@ public class LoginController {
                         ));
                         Stage stage = new Stage();
                         stage.setScene(new Scene(loader1.load()));
+                        AdminForgotPassword adminForgotPassword = loader1.getController();
+                        adminForgotPassword.setCurrentStage(stage);
                         stage.showAndWait();
                         break;
                     case 1:
