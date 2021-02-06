@@ -1,11 +1,11 @@
 package controller;
 
-import extra.HostServicesProvider;
 import extra.ImagesLink;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
@@ -77,9 +77,12 @@ public class LoginController {
                 int choice = forgotPassword.selectedAccount();
                 switch (choice) {
                     case 0:
-                        HostServicesProvider.INSTANCE.getHostServices().showDocument(
-                                "http://localhost:8080/server_war_exploded/forgotPassword.jsp"
-                        );
+                        FXMLLoader loader1 = new FXMLLoader(getClass().getResource(
+                                "/fxml/admin-forgot-password.fxml"
+                        ));
+                        Stage stage = new Stage();
+                        stage.setScene(new Scene(loader1.load()));
+                        stage.showAndWait();
                         break;
                     case 1:
                         break;
