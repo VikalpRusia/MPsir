@@ -1,5 +1,6 @@
 package controller;
 
+import extra.HostServicesProvider;
 import extra.ImagesLink;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -76,6 +77,9 @@ public class LoginController {
                 int choice = forgotPassword.selectedAccount();
                 switch (choice) {
                     case 0:
+                        HostServicesProvider.INSTANCE.getHostServices().showDocument(
+                                "http://localhost:8080/server_war_exploded/forgotPassword.jsp"
+                        );
                         break;
                     case 1:
                         break;
