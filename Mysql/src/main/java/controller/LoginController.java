@@ -84,6 +84,12 @@ public class LoginController {
                         ));
                         Stage stage = new Stage();
                         stage.setScene(new Scene(loader1.load()));
+                        stage.getIcons().add(
+                                new Image(ImagesLink.icon)
+                        );
+                        stage.setTitle("admin account:reset password");
+                        stage.initOwner(dialogPane.getScene().getWindow());
+                        stage.initModality(Modality.APPLICATION_MODAL);
                         AdminForgotPassword adminForgotPassword = loader1.getController();
                         adminForgotPassword.setCurrentStage(stage);
                         stage.showAndWait();
