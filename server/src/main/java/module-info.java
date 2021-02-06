@@ -1,3 +1,4 @@
 module server {
-    requires javax.servlet.api;
+    requires spring.context;
+    requires java.sql;
 }
