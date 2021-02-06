@@ -38,6 +38,8 @@ public class LoginController {
                 login,
                 ButtonType.CANCEL
         );
+        Button okBtn = (Button) dialogPane.lookupButton(dialogPane.getButtonTypes().get(0));
+        okBtn.setStyle("-fx-background-color: royalblue;-fx-text-fill: white");
         Platform.runLater(() -> username.requestFocus());
         Node loginButton = dialogPane.lookupButton(login);
         loginButton.setDisable(true);
