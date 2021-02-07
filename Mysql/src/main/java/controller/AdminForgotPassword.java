@@ -18,8 +18,8 @@ public class AdminForgotPassword {
     @FXML
     private VBox error;
 
-    public void initialize(){
-        Platform.runLater(()-> root.requestFocus());
+    public void initialize() {
+        Platform.runLater(() -> root.requestFocus());
         error.managedProperty().bind(error.visibleProperty());
     }
 
@@ -28,12 +28,12 @@ public class AdminForgotPassword {
     }
 
     @FXML
-    public void exit(){
+    public void exit() {
         currentStage.close();
     }
 
     @FXML
-    public void search(){
+    public void search() {
         String searchText = searchTextField.getText();
         error.setVisible(true);
     }

@@ -7,7 +7,8 @@ import java.sql.SQLException;
 public class Database implements AutoCloseable {
     private final Connection conn;
 
-    public Database() throws SQLException { this.conn = DriverManager.getConnection("jdbc:sqlite:passwords.sqlite");
+    public Database() throws SQLException {
+        this.conn = DriverManager.getConnection("jdbc:sqlite:passwords.sqlite");
     }
 
     @Override

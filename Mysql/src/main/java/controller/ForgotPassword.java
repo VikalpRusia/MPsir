@@ -21,7 +21,7 @@ public class ForgotPassword {
         Button okBtn = (Button) dialogPane.lookupButton(dialogPane.getButtonTypes().get(0));
         okBtn.setStyle("-fx-background-color: royalblue;-fx-text-fill: white");
         accountType.selectedToggleProperty().addListener((observableValue, toggle, t1) ->
-                selectedToggleValue = Integer.parseInt((String)t1.getUserData()));
+                selectedToggleValue = Integer.parseInt((String) t1.getUserData()));
     }
 
     protected int selectedAccount() {
