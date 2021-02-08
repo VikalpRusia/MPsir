@@ -14,22 +14,23 @@ public class Database implements AutoCloseable {
     public Database() throws SQLException, ClassNotFoundException {
         Class.forName("org.sqlite.JDBC");
         URL res = getClass().getClassLoader().getResource("passwords.sqlite");
-        if (res==null){
+        if (res == null) {
             throw new RuntimeException(
                     "Database not present in resource folder with name passwords.sqlite"
             );
         }
-        this.conn = DriverManager.getConnection("jdbc:sqlite:"+res.getPath());
+        this.conn = DriverManager.getConnection("jdbc:sqlite:" + res.getPath());
         this.searchStatement = conn.prepareStatement(
                 "SELECT * FROM passwords WHERE phone_number = ? OR mail_id=?"
         );
     }
+
     public Boolean search(String search) throws SQLException {
 
-        searchStatement.setString(1,search);
-        searchStatement.setString(2,search);
+        searchStatement.setString(1, search);
+        searchStatement.setString(2, search);
         try (
-            ResultSet resultSet = searchStatement.executeQuery()){
+                ResultSet resultSet = searchStatement.executeQuery()) {
             return resultSet != null;
         }
     }

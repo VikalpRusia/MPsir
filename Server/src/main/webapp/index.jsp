@@ -7,10 +7,10 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
-  <head>
+<head>
     <title>$Title$</title>
-  </head>
-  <body>
-  <a href="hello">hello</a>
-  </body>
+</head>
+<body>
+<a href="hello">hello</a>
+</body>
 </html>
