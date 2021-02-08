@@ -4,4 +4,5 @@ module Server {
     requires spring.web;
     requires sqlite.jdbc;
     requires spring.beans;
+    requires java.annotation;
 }
