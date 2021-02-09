@@ -11,6 +11,6 @@
     <title>$Title$</title>
 </head>
 <body>
-<a href="hello">hello</a>
+<a href="search">Search</a>
 </body>
 </html>
