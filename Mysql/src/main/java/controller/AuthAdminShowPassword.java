@@ -5,7 +5,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.apache.http.HttpStatus;
@@ -25,9 +24,9 @@ import java.util.Scanner;
 
 public class AuthAdminShowPassword {
 
-    private Stage currentStage;
     private final SimpleStringProperty userNameStr = new SimpleStringProperty();
     private final SimpleStringProperty searchDataStr = new SimpleStringProperty();
+    private Stage currentStage;
     @FXML
     private Text userName;
     @FXML
@@ -40,7 +39,7 @@ public class AuthAdminShowPassword {
 
 
     public void setUserNameStr(String userNameStr) {
-        this.userNameStr.setValue(userNameStr+"\n");
+        this.userNameStr.setValue(userNameStr + "\n");
     }
 
     public void setSearchDataStr(String searchDataStr) {
@@ -53,7 +52,7 @@ public class AuthAdminShowPassword {
 
     public void resetPassword() throws IOException {
         currentStage.close();
-        try(CloseableHttpClient client = HttpClients.createDefault()) {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
             HttpPost request = new HttpPost("http://localhost:8080/Server_war_exploded/showPassword");
             ArrayList<NameValuePair> postParameters = new ArrayList<>();
             postParameters.add(new BasicNameValuePair("search", searchDataStr.getValue().strip()));
@@ -64,7 +63,7 @@ public class AuthAdminShowPassword {
                 if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                     throw new ConnectException("Page search not found for URL" + request.getURI());
                 }
-                while (sc.hasNextLine()){
+                while (sc.hasNextLine()) {
                     System.out.println(sc.nextLine());
                 }
             } catch (ConnectException e) {

@@ -35,19 +35,20 @@ public class Database implements AutoCloseable {
         searchStatement.setString(2, search);
         try (
                 ResultSet resultSet = searchStatement.executeQuery()) {
-            if (resultSet.next()){
+            if (resultSet.next()) {
                 return resultSet.getString(3);
             }
         }
         return null;
     }
+
     public String[] sendMailWithPasscode(String search) throws SQLException {
         mail_with_password.setString(1, search);
         mail_with_password.setString(2, search);
         String[] strings = new String[2];
         try (
                 ResultSet resultSet = mail_with_password.executeQuery()) {
-            if (resultSet.next()){
+            if (resultSet.next()) {
                 strings[0] = resultSet.getString(1);
                 strings[1] = resultSet.getString(2);
                 return strings;

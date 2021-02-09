@@ -24,15 +24,16 @@ public class ForgotPasswordController {
     @RequestMapping(value = "/search", method = RequestMethod.POST)
     public String validateUser(@RequestParam(value = "search", defaultValue = "") String toBeSearched) throws SQLException {
         String result = database.search(toBeSearched);
-        if (result !=null) {
+        if (result != null) {
             return "true\n" + result;
         } else {
             return "false";
         }
     }
+
     @ResponseBody
-    @RequestMapping(value = "/showPassword",method = RequestMethod.POST)
-    public String sendMePassword(@RequestParam(value = "search", defaultValue = "") String toBeSearched){
+    @RequestMapping(value = "/showPassword", method = RequestMethod.POST)
+    public String sendMePassword(@RequestParam(value = "search", defaultValue = "") String toBeSearched) {
         return toBeSearched;
     }
 }
