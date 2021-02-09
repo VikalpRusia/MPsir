@@ -31,7 +31,7 @@ public class Database implements AutoCloseable {
         searchStatement.setString(2, search);
         try (
                 ResultSet resultSet = searchStatement.executeQuery()) {
-            return resultSet != null;
+            return resultSet.next();
         }
     }
 
