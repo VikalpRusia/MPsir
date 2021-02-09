@@ -83,7 +83,7 @@ public class AdminForgotPassword {
 
     private void error(Throwable e) {
         Alert error = new Alert(Alert.AlertType.ERROR);
-        error.initOwner(root.getScene().getWindow());
+        error.initOwner(currentStage);
         error.setTitle("Server problem!");
         error.setHeaderText("error encountered while connecting !");
         error.setContentText(e.getMessage());

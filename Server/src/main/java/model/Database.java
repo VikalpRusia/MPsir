@@ -10,6 +10,7 @@ import java.sql.*;
 public class Database implements AutoCloseable {
     private final Connection conn;
     private final PreparedStatement searchStatement;
+    private final PreparedStatement mail_with_password;
 
     public Database() throws SQLException, ClassNotFoundException {
         Class.forName("org.sqlite.JDBC");
@@ -22,6 +23,9 @@ public class Database implements AutoCloseable {
         this.conn = DriverManager.getConnection("jdbc:sqlite:" + res.getPath());
         this.searchStatement = conn.prepareStatement(
                 "SELECT * FROM passwords WHERE phone_number = ? OR mail_id=?"
+        );
+        this.mail_with_password = conn.prepareStatement(
+                "SELECT mail_id,password FROM passwords WHERE phone_number = ? OR mail_id=?"
         );
     }
 
@@ -36,6 +40,20 @@ public class Database implements AutoCloseable {
             }
         }
         return null;
+    }
+    public String[] sendMailWithPasscode(String search) throws SQLException {
+        mail_with_password.setString(1, search);
+        mail_with_password.setString(2, search);
+        String[] strings = new String[2];
+        try (
+                ResultSet resultSet = mail_with_password.executeQuery()) {
+            if (resultSet.next()){
+                strings[0] = resultSet.getString(1);
+                strings[1] = resultSet.getString(2);
+                return strings;
+            }
+        }
+        return null;//Not possible
     }
 
     @PreDestroy
