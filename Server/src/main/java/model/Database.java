@@ -25,14 +25,17 @@ public class Database implements AutoCloseable {
         );
     }
 
-    public Boolean search(String search) throws SQLException {
+    public String search(String search) throws SQLException {
 
         searchStatement.setString(1, search);
         searchStatement.setString(2, search);
         try (
                 ResultSet resultSet = searchStatement.executeQuery()) {
-            return resultSet.next();
+            if (resultSet.next()){
+                return resultSet.getString(3);
+            }
         }
+        return null;
     }
 
     @PreDestroy

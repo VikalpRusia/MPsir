@@ -2,6 +2,8 @@ package controller;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -64,7 +66,12 @@ public class AdminForgotPassword {
                     throw new ConnectException("Page search not found for URL" + request.getURI());
                 }
                 if (Boolean.parseBoolean(sc.nextLine())) {
-                    System.out.println("success");
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/authAdminShowPassword.fxml"));
+                    currentStage.setScene(new Scene(fxmlLoader.load()));
+                    AuthAdminShowPassword resetPassword = fxmlLoader.getController();
+                    resetPassword.setUserNameStr(sc.nextLine());
+                    resetPassword.setSearchDataStr(searchText);
+                    resetPassword.setCurrentStage(currentStage);
                 } else {
                     error.setVisible(true);
                 }
