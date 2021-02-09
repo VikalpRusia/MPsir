@@ -22,7 +22,7 @@ public class ForgotPasswordController {
 
     @ResponseBody
     @RequestMapping(value = "/search", method = RequestMethod.POST)
-    public String sendMePassword(@RequestParam(value = "search", defaultValue = "")String toBeSearched) throws SQLException {
+    public String sendMePassword(@RequestParam(value = "search", defaultValue = "") String toBeSearched) throws SQLException {
         return String.valueOf(database.search(toBeSearched));
     }
 }

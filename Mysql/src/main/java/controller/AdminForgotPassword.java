@@ -63,9 +63,9 @@ public class AdminForgotPassword {
                 if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                     throw new ConnectException("Page search not found for URL" + request.getURI());
                 }
-                if (Boolean.parseBoolean(sc.nextLine())){
+                if (Boolean.parseBoolean(sc.nextLine())) {
                     System.out.println("success");
-                } else{
+                } else {
                     error.setVisible(true);
                 }
             } catch (ConnectException e) {
