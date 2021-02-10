@@ -9,9 +9,9 @@ import java.util.Properties;
 
 @Component
 public class Mailing {
-    final String sender = "18bcs163@ietdavv.edu.in";
+    final String sender = "18bcs163@ietdavv.edu.in";//sample mail
     final String host = "smtp.gmail.com";
-    final String password = "tjgksuwpvlhilfna";
+    final String password = "tjgksuwpvlhilfna";//sample password
     final Properties props = System.getProperties();
     final Session session;
     String recipient;
