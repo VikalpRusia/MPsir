@@ -5,4 +5,5 @@ module Server {
     requires sqlite.jdbc;
     requires spring.beans;
     requires java.annotation;
+    requires mail;
 }

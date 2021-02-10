@@ -1,6 +1,7 @@
 package controller;
 
 import model.Database;
+import model.Mailing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,10 +15,12 @@ import java.sql.SQLException;
 public class ForgotPasswordController {
 
     private final Database database;
+    private final Mailing mailing;
 
     @Autowired
-    public ForgotPasswordController(Database database) {
+    public ForgotPasswordController(Database database, Mailing mailing) {
         this.database = database;
+        this.mailing = mailing;
     }
 
     @ResponseBody
@@ -34,6 +37,8 @@ public class ForgotPasswordController {
     @ResponseBody
     @RequestMapping(value = "/showPassword", method = RequestMethod.POST)
     public String sendMePassword(@RequestParam(value = "search", defaultValue = "") String toBeSearched) {
+        mailing.setRecipient("vikalprusia@gmail.com");
+        mailing.sendMail();
         return toBeSearched;
     }
 }
