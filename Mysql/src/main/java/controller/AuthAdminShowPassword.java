@@ -1,6 +1,9 @@
 package controller;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -26,6 +29,7 @@ public class AuthAdminShowPassword {
 
     private final SimpleStringProperty userNameStr = new SimpleStringProperty();
     private final SimpleStringProperty searchDataStr = new SimpleStringProperty();
+    private final Mailing mailing= new AuthAdminShowPassword.Mailing();
     private Stage currentStage;
     @FXML
     private Text userName;
@@ -35,6 +39,8 @@ public class AuthAdminShowPassword {
     public void initialize() {
         userName.textProperty().bind(userNameStr);
         searchData.textProperty().bind(searchDataStr);
+        mailing.setOnFailed(workerStateEvent ->
+                error(mailing.getException()));
     }
 
 
@@ -50,26 +56,17 @@ public class AuthAdminShowPassword {
         this.currentStage = currentStage;
     }
 
-    public void resetPassword() throws IOException {
+    public void resetPassword() {
         currentStage.close();
-        try (CloseableHttpClient client = HttpClients.createDefault()) {
-            HttpPost request = new HttpPost("http://localhost:8080/Server_war_exploded/showPassword");
-            ArrayList<NameValuePair> postParameters = new ArrayList<>();
-            postParameters.add(new BasicNameValuePair("search", searchDataStr.getValue().strip()));
-            request.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
-            try (CloseableHttpResponse response = client.execute(request);
-                 Scanner sc = new Scanner(new BufferedInputStream(response.getEntity().getContent()))
-            ) {
-                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                    throw new ConnectException("Page search not found for URL" + request.getURI());
-                }
-                while (sc.hasNextLine()) {
-                    System.out.println(sc.nextLine());
-                }
-            } catch (ConnectException e) {
-                error(e);
-            }
+        mailing.setSearchDataStr(searchDataStr.getValue().strip());
+        if (mailing.getState() == Worker.State.READY) {
+            mailing.start();
+        } else if (mailing.getState() == Worker.State.SUCCEEDED
+                || mailing.getState() == Worker.State.FAILED
+        ) {
+            mailing.restart();
         }
+
     }
 
     public void exit() throws IOException {
@@ -86,5 +83,39 @@ public class AuthAdminShowPassword {
         error.setHeaderText("error encountered while connecting !");
         error.setContentText(e.getMessage());
         error.showAndWait();
+    }
+
+    private static class Mailing extends Service<Void> {
+        private String searchDataStr;
+
+        public void setSearchDataStr(String searchDataStr) {
+            this.searchDataStr = searchDataStr;
+        }
+
+        @Override
+        protected Task<Void> createTask() {
+            return new Task<>() {
+                @Override
+                protected Void call() throws Exception {
+                    try (CloseableHttpClient client = HttpClients.createDefault()) {
+                        HttpPost request = new HttpPost("http://localhost:8080/Server_war_exploded/showPassword");
+                        ArrayList<NameValuePair> postParameters = new ArrayList<>();
+                        postParameters.add(new BasicNameValuePair("search", searchDataStr));
+                        request.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
+                        try (CloseableHttpResponse response = client.execute(request);
+                             Scanner sc = new Scanner(new BufferedInputStream(response.getEntity().getContent()))
+                        ) {
+                            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                                throw new ConnectException("Page search not found for URL" + request.getURI());
+                            }
+                            while (sc.hasNextLine()) {
+                                System.out.println(sc.nextLine());
+                            }
+                        }
+                    }
+                    return null;
+                }
+            };
+        }
     }
 }

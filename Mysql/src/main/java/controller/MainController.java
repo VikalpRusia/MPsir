@@ -176,7 +176,7 @@ public class MainController {
         logger.atTrace().log("Configuring Table List Provider");
         tableListProvider = new Services.TableListProvider();
         tableListProvider.setOnFailed(workerStateEvent ->
-                alertShow(databaseListProvider.getException()));
+                alertShow(tableListProvider.getException()));
 
         tableView.itemsProperty().bind(tableListProvider.valueProperty());
         logger.atTrace().log("Table View item property bound to Table List Provider value Property");
