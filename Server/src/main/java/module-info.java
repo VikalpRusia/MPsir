@@ -6,4 +6,5 @@ module Server {
     requires spring.beans;
     requires java.annotation;
     requires mail;
+    requires activation;
 }
