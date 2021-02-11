@@ -76,7 +76,7 @@ public class AdminForgotPassword {
                 } else {
                     error.setVisible(true);
                 }
-            } catch (IOException e){
+            } catch (IOException e) {
                 error(e);
             }
         });

@@ -75,7 +75,8 @@ public class Mailing {
             mex.printStackTrace();
         }
     }
+
     @PreDestroy
-    public void close(){
+    public void close() {
     }
 }

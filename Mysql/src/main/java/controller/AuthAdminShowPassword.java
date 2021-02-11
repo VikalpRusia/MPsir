@@ -29,7 +29,7 @@ public class AuthAdminShowPassword {
 
     private final SimpleStringProperty userNameStr = new SimpleStringProperty();
     private final SimpleStringProperty searchDataStr = new SimpleStringProperty();
-    private final Mailing mailing= new AuthAdminShowPassword.Mailing();
+    private final Mailing mailing = new AuthAdminShowPassword.Mailing();
     private Stage currentStage;
     @FXML
     private Text userName;
