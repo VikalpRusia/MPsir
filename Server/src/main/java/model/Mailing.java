@@ -6,12 +6,14 @@ import org.springframework.stereotype.Component;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
-import javax.annotation.PreDestroy;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Properties;
 
 @Component
@@ -19,6 +21,7 @@ public class Mailing {
     final private String sender;//sample mail
     final private Session session;
     String recipient;
+    private String filePath;
 
     public Mailing(@Value("${sender}") String sender, @Value("${password}") String password,
                    @Value("${host}") String host) {
@@ -35,13 +38,18 @@ public class Mailing {
         };
         this.session = Session.getInstance(props, auth);
         this.sender = sender;
+
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public void setRecipient(String recipient) {
         this.recipient = recipient;
     }
 
-    public void sendMail() {
+    public void sendMail() throws IOException {
         try {
             MimeMessage message = new MimeMessage(session);
 
@@ -60,9 +68,9 @@ public class Mailing {
                     "<br> This e-mail contains privileged information or information belonging to MySql Workbench and is intended solely for the addressee/s. Access to this email by anyone else is unauthorized. Any copying (whole or partial) or further distribution beyond the original recipient is not intended, and may be unlawful. The recipient acknowledges that MySql Workbench is unable to exercise control or ensure or guarantee the integrity of the contents of the information contained in e-mail transmissions and further acknowledges that any views expressed in this message are those of the individual sender and are not binding on MySql Workbench. E-mails are susceptible to alteration and their integrity cannot be guaranteed. MySql Workbench does not accept any liability for any damages caused on account of this e-mail. If you have received this email in error, please contact the sender and delete the material from your computer.", "text/html");
 
             BodyPart attachment = new MimeBodyPart();
-            DataSource dataSource = new FileDataSource("C:/Users/vikal/Desktop/reset-password.pdf");
+            DataSource dataSource = new FileDataSource(filePath);
             attachment.setDataHandler(new DataHandler(dataSource));
-            attachment.setFileName("abc.pdf");
+            attachment.setFileName("reset-password.pdf");
 
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(messageBodyPart);
@@ -73,10 +81,12 @@ public class Mailing {
             System.out.println("Mail successfully sent");
         } catch (MessagingException mex) {
             mex.printStackTrace();
+        } finally {
+            close();
         }
     }
 
-    @PreDestroy
-    public void close() {
+    public void close() throws IOException {
+        Files.delete(Path.of(filePath));
     }
 }

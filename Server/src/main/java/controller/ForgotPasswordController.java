@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
 
 @Controller
@@ -21,7 +23,7 @@ public class ForgotPasswordController {
     private final SetUpPDF setUpPDF;
 
     @Autowired
-    public ForgotPasswordController(Database database, Mailing mailing,SetUpPDF setUpPDF) {
+    public ForgotPasswordController(Database database, Mailing mailing, SetUpPDF setUpPDF) {
         this.database = database;
         this.mailing = mailing;
         this.setUpPDF = setUpPDF;
@@ -42,8 +44,10 @@ public class ForgotPasswordController {
     @RequestMapping(value = "/showPassword", method = RequestMethod.POST)
     public String sendMePassword(@RequestParam(value = "search", defaultValue = "") String toBeSearched) throws SQLException, IOException {
         String[] details = database.sendMail_Passcode_DOB_Phone(toBeSearched);
+        Path path = Files.createTempFile("", ".pdf");
+        setUpPDF.main(details[1], details[2], details[3], path.toAbsolutePath().toString());
         mailing.setRecipient(details[0]);
-        setUpPDF.main(details[1],details[2],details[3]);
+        mailing.setFilePath(path.toAbsolutePath().toString());
         mailing.sendMail();
         return toBeSearched;
     }

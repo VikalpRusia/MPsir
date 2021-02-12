@@ -11,25 +11,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+
 @Component
 public class SetUpPDF {
-    private PDDocument document;
     private final String setTitle;
     private final String setAuthor;
+    private PDDocument document;
+
 
     public SetUpPDF(@Value("${pdf.title}") String setTitle, @Value("${pdf.author}") String setAuthor) {
         this.setTitle = setTitle;
         this.setAuthor = setAuthor;
     }
 
-    public void main(String password, String dob, String phoneNumber) throws IOException {
+    public void main(String password, String dob, String phoneNumber, String filePath) throws IOException {
         this.document = new PDDocument();
         PDDocumentInformation info = document.getDocumentInformation();
         info.setTitle(setTitle);
         info.setAuthor(setAuthor);
         insertText(password);
         encrypt(dob, phoneNumber);
-        save();
+        save(filePath);
     }
 
     private void insertText(String password) throws IOException {
@@ -53,8 +55,8 @@ public class SetUpPDF {
         document.protect(sp);
     }
 
-    private void save() throws IOException {
-        document.save("C:/Users/vikal/Desktop/reset-password.pdf");
+    private void save(String filePath) throws IOException {
+        document.save(filePath);
         document.close();
     }
 }
