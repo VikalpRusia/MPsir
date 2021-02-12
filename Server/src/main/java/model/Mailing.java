@@ -17,12 +17,12 @@ import java.util.Properties;
 @Component
 public class Mailing {
     final private String sender;//sample mail
-    final private String host = "smtp.gmail.com";
-    final private Properties props = System.getProperties();
     final private Session session;
     String recipient;
 
-    public Mailing(@Value("${sender}") String sender, @Value("${password}") String password) {
+    public Mailing(@Value("${sender}") String sender, @Value("${password}") String password,
+                   @Value("${host}") String host) {
+        Properties props = System.getProperties();
         props.put("mail.smtp.host", host); //SMTP Host
         props.put("mail.smtp.port", "587"); //TLS Port
         props.put("mail.smtp.auth", "true"); //enable authentication

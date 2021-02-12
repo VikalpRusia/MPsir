@@ -7,4 +7,5 @@ module Server {
     requires java.annotation;
     requires mail;
     requires activation;
+//    requires org.apache.pdfbox;
 }
