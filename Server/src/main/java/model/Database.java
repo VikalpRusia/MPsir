@@ -25,7 +25,7 @@ public class Database implements AutoCloseable {
                 "SELECT * FROM passwords WHERE phone_number = ? OR mail_id=?"
         );
         this.mail_with_password = conn.prepareStatement(
-                "SELECT mail_id,password FROM passwords WHERE phone_number = ? OR mail_id=?"
+                "SELECT mail_id,password,date,phone_number FROM passwords WHERE phone_number = ? OR mail_id=?"
         );
     }
 
@@ -42,15 +42,17 @@ public class Database implements AutoCloseable {
         return null;
     }
 
-    public String[] sendMailWithPasscode(String search) throws SQLException {
+    public String[] sendMail_Passcode_DOB_Phone(String search) throws SQLException {
         mail_with_password.setString(1, search);
         mail_with_password.setString(2, search);
-        String[] strings = new String[2];
+        String[] strings = new String[4];
         try (
                 ResultSet resultSet = mail_with_password.executeQuery()) {
             if (resultSet.next()) {
                 strings[0] = resultSet.getString(1);
                 strings[1] = resultSet.getString(2);
+                strings[2] = resultSet.getString(3);
+                strings[3] = resultSet.getString(4);
                 return strings;
             }
         }
