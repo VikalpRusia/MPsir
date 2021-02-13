@@ -57,7 +57,6 @@ public class AuthAdminShowPassword {
     }
 
     public void resetPassword() {
-        currentStage.close();
         mailing.setSearchDataStr(searchDataStr.getValue().strip());
         if (mailing.getState() == Worker.State.READY) {
             mailing.start();
@@ -66,7 +65,7 @@ public class AuthAdminShowPassword {
         ) {
             mailing.restart();
         }
-
+        currentStage.close();
     }
 
     public void exit() throws IOException {

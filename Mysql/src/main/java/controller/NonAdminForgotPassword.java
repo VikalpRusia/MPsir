@@ -49,6 +49,7 @@ public class NonAdminForgotPassword {
         ) {
             requestingAdminViaMail.restart();
         }
+        exit();
     }
 
     public void setCurrentStage(Stage currentStage) {

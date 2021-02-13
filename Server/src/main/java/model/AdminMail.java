@@ -17,14 +17,14 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 @Component
-public class Mailing {
+public class AdminMail {
     final private String sender;//sample mail
     final private Session session;
     String recipient;
     private String filePath;
 
-    public Mailing(@Value("${sender}") String sender, @Value("${password}") String password,
-                   @Value("${host}") String host) {
+    public AdminMail(@Value("${sender}") String sender, @Value("${password}") String password,
+                     @Value("${host}") String host) {
         Properties props = System.getProperties();
         props.put("mail.smtp.host", host); //SMTP Host
         props.put("mail.smtp.port", "587"); //TLS Port

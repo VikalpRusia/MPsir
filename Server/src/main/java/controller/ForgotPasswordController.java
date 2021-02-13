@@ -1,7 +1,8 @@
 package controller;
 
+import model.AdminMail;
 import model.Database;
-import model.Mailing;
+import model.NonAdminMail;
 import model.SetUpPDF;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,20 +15,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Arrays;
 
 @Controller
 public class ForgotPasswordController {
 
     private final Database database;
-    private final Mailing mailing;
+    private final AdminMail adminMail;
+    private final NonAdminMail nonAdminMail;
     private final SetUpPDF setUpPDF;
 
     @Autowired
-    public ForgotPasswordController(Database database, Mailing mailing, SetUpPDF setUpPDF) {
+    public ForgotPasswordController(Database database, AdminMail adminMail, SetUpPDF setUpPDF,NonAdminMail nonAdminMail) {
         this.database = database;
-        this.mailing = mailing;
+        this.adminMail = adminMail;
         this.setUpPDF = setUpPDF;
+        this.nonAdminMail = nonAdminMail;
     }
 
     @ResponseBody
@@ -47,9 +49,9 @@ public class ForgotPasswordController {
         String[] details = database.sendMail_Passcode_DOB_Phone(toBeSearched);
         Path path = Files.createTempFile("", ".pdf");
         setUpPDF.main(details[1], details[2], details[3], path.toAbsolutePath().toString());
-        mailing.setRecipient(details[0]);
-        mailing.setFilePath(path.toAbsolutePath().toString());
-        mailing.sendMail();
+        adminMail.setRecipient(details[0]);
+        adminMail.setFilePath(path.toAbsolutePath().toString());
+        adminMail.sendMail();
         return toBeSearched;
     }
 
@@ -57,6 +59,9 @@ public class ForgotPasswordController {
     @RequestMapping(value = "/non-admin", method = RequestMethod.POST)
     public String notifyAdmin(@RequestParam(value = "name", defaultValue = "") String name,
                               @RequestParam(value = "UUID", defaultValue = "") String UUID) throws SQLException {
-        return Arrays.toString(database.getMail(UUID).toArray());
+        nonAdminMail.setUserName(name);
+        nonAdminMail.setRecipient(database.getMail(UUID));
+        nonAdminMail.sendMail();
+        return "succesfully sent";
     }
 }
