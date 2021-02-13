@@ -24,8 +24,7 @@ public class ForgotPasswordController {
     private final NonAdminMail nonAdminMail;
     private final SetUpPDF setUpPDF;
 
-    @Autowired
-    public ForgotPasswordController(Database database, AdminMail adminMail, SetUpPDF setUpPDF,NonAdminMail nonAdminMail) {
+    @Autowired public ForgotPasswordController(Database database, AdminMail adminMail, SetUpPDF setUpPDF, NonAdminMail nonAdminMail) {
         this.database = database;
         this.adminMail = adminMail;
         this.setUpPDF = setUpPDF;
