@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 import java.net.URL;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class Database implements AutoCloseable {
@@ -63,14 +65,12 @@ public class Database implements AutoCloseable {
         return null;//Not possible
     }
 
-    public String[] getMail(String UUID) throws SQLException {
+    public List<String> getMail(String UUID) throws SQLException {
         mail_with_UUID.setString(1, UUID);
         try (ResultSet resultSet = mail_with_UUID.executeQuery()) {
-            resultSet.last();
-            String[] mails = new String[resultSet.getRow()];
-            resultSet.beforeFirst();
+            List<String> mails = new ArrayList<>();
             while (resultSet.next()) {
-                mails[resultSet.getRow() - 1] = resultSet.getString(1);
+                mails.add(resultSet.getString(1));
             }
             return mails;
         }

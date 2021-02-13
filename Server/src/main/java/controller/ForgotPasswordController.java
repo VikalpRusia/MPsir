@@ -57,6 +57,6 @@ public class ForgotPasswordController {
     @RequestMapping(value = "/non-admin", method = RequestMethod.POST)
     public String notifyAdmin(@RequestParam(value = "name", defaultValue = "") String name,
                               @RequestParam(value = "UUID", defaultValue = "") String UUID) throws SQLException {
-        return Arrays.toString(database.getMail(UUID));
+        return Arrays.toString(database.getMail(UUID).toArray());
     }
 }
