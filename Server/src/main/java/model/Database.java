@@ -11,6 +11,7 @@ public class Database implements AutoCloseable {
     private final Connection conn;
     private final PreparedStatement searchStatement;
     private final PreparedStatement mail_with_password;
+    private final PreparedStatement mail_with_UUID;
 
     public Database() throws SQLException, ClassNotFoundException {
         Class.forName("org.sqlite.JDBC");
@@ -26,6 +27,9 @@ public class Database implements AutoCloseable {
         );
         this.mail_with_password = conn.prepareStatement(
                 "SELECT mail_id,password,date,phone_number FROM passwords WHERE phone_number = ? OR mail_id=?"
+        );
+        this.mail_with_UUID = conn.prepareStatement(
+                "SELECT mail_id FROM passwords WHERE UUID = ?"
         );
     }
 
@@ -57,6 +61,19 @@ public class Database implements AutoCloseable {
             }
         }
         return null;//Not possible
+    }
+
+    public String[] getMail(String UUID) throws SQLException {
+        mail_with_UUID.setString(1, UUID);
+        try (ResultSet resultSet = mail_with_UUID.executeQuery()) {
+            resultSet.last();
+            String[] mails = new String[resultSet.getRow()];
+            resultSet.beforeFirst();
+            while (resultSet.next()) {
+                mails[resultSet.getRow() - 1] = resultSet.getString(1);
+            }
+            return mails;
+        }
     }
 
     @PreDestroy

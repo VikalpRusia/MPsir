@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 @Controller
 public class ForgotPasswordController {
@@ -50,5 +51,12 @@ public class ForgotPasswordController {
         mailing.setFilePath(path.toAbsolutePath().toString());
         mailing.sendMail();
         return toBeSearched;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/non-admin", method = RequestMethod.POST)
+    public String notifyAdmin(@RequestParam(value = "name", defaultValue = "") String name,
+                              @RequestParam(value = "UUID", defaultValue = "") String UUID) throws SQLException {
+        return Arrays.toString(database.getMail(UUID));
     }
 }

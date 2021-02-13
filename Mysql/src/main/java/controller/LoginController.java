@@ -87,7 +87,7 @@ public class LoginController {
                         stage.getIcons().add(
                                 new Image(ImagesLink.icon)
                         );
-                        stage.setTitle("admin account:reset password");
+                        stage.setTitle("admin account: reset password");
                         stage.initOwner(dialogPane.getScene().getWindow());
                         stage.initModality(Modality.APPLICATION_MODAL);
                         AdminForgotPassword adminForgotPassword = loader1.getController();
@@ -95,6 +95,20 @@ public class LoginController {
                         stage.showAndWait();
                         break;
                     case 1:
+                        FXMLLoader loader2 = new FXMLLoader(getClass().getResource(
+                                "/fxml/non-admin-forgot-password.fxml"
+                        ));
+                        Stage stage1 = new Stage();
+                        stage1.setScene(new Scene(loader2.load()));
+                        stage1.getIcons().add(
+                                new Image(ImagesLink.icon)
+                        );
+                        stage1.setTitle("non-admin account: reset password");
+                        stage1.initOwner(dialogPane.getScene().getWindow());
+                        stage1.initModality(Modality.APPLICATION_MODAL);
+                        NonAdminForgotPassword nonAdminForgotPassword = loader2.getController();
+                        nonAdminForgotPassword.setCurrentStage(stage1);
+                        stage1.showAndWait();
                         break;
                 }
             }
