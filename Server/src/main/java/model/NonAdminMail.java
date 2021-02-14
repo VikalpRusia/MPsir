@@ -15,8 +15,9 @@ import java.util.Properties;
 public class NonAdminMail {
     final private String sender;//sample mail
     final private Session session;
-    List<String> recipient;
+    private List<String> recipient;
     private String userName;
+    private String password;
 
     public NonAdminMail(@Value("${sender}") String sender, @Value("${password}") String password,
                         @Value("${host}") String host) {
@@ -34,6 +35,10 @@ public class NonAdminMail {
         this.session = Session.getInstance(props, auth);
         this.sender = sender;
 
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setUserName(String userName) {
@@ -68,7 +73,8 @@ public class NonAdminMail {
             // set body of the email.
             messageBodyPart.setContent("<h3>" + userName + " is requesting password change</h3>" +
                     "<br> Please verify that " + userName + " is a valid person before changing password and do contact" +
-                    " that person to <b>verify the password reset was requested from him/her</b>.", "text/html");
+                    " that person to <b>verify the password reset was requested from him/her</b>." +
+                    "<h2>New password being requested is <i>" + password + "</i>.</h2>", "text/html");
 
 
             Multipart multipart = new MimeMultipart();

@@ -5,9 +5,9 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -28,20 +28,52 @@ public class NonAdminForgotPassword {
 
     private final RequestingAdminViaMail requestingAdminViaMail = new RequestingAdminViaMail();
     private Stage currentStage;
+
+    @FXML
+    private Button sendingRequest;
+    @FXML
+    private PasswordField invisiblePassword;
+    @FXML
+    private TextField visiblePassword;
+    @FXML
+    private PasswordField confirmPassword;
+    @FXML
+    private CheckBox isPasswordVisible;
+    @FXML
+    private VBox error;
     @FXML
     private AnchorPane root;
     @FXML
     private TextField userName;
 
     public void initialize() {
+        invisiblePassword.textProperty().bindBidirectional(visiblePassword.textProperty());
+        invisiblePassword.visibleProperty().bind(isPasswordVisible.selectedProperty().not());
+        visiblePassword.visibleProperty().bind(isPasswordVisible.selectedProperty());
+
+        error.managedProperty().bind(error.visibleProperty());
         Platform.runLater(() -> root.requestFocus());
         requestingAdminViaMail.setOnFailed(workerStateEvent ->
                 error(requestingAdminViaMail.getException()));
+        sendingRequest.setDisable(true);
+        userName.textProperty().addListener((observableValue, s, t1) -> verify());
+        confirmPassword.textProperty().addListener((observableValue, s, t1) -> verify());
+        invisiblePassword.textProperty().addListener((observableValue, s, t1) -> verify());
+    }
 
+    private void verify() {
+        sendingRequest.setDisable(
+                userName.getText().equals("") || confirmPassword.getText().equals("")
+                        || invisiblePassword.getText().equals(""));
     }
 
     public void sendRequest() {
+        if (!confirmPassword.getText().equals(invisiblePassword.getText())) {
+            error.setVisible(true);
+            return;
+        }
         requestingAdminViaMail.setUserName(userName.getText());
+        requestingAdminViaMail.setPassword(confirmPassword.getText());
         if (requestingAdminViaMail.getState() == Worker.State.READY) {
             requestingAdminViaMail.start();
         } else if (requestingAdminViaMail.getState() == Worker.State.SUCCEEDED
@@ -71,9 +103,14 @@ public class NonAdminForgotPassword {
 
     private static class RequestingAdminViaMail extends Service<Void> {
         private String userName;
+        private String password;
 
         public void setUserName(String userName) {
             this.userName = userName;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
         }
 
         @Override
@@ -87,6 +124,7 @@ public class NonAdminForgotPassword {
                         ArrayList<NameValuePair> postParameters = new ArrayList<>();
                         postParameters.add(new BasicNameValuePair("name", userName));
                         postParameters.add(new BasicNameValuePair("UUID", getUUID()));
+                        postParameters.add(new BasicNameValuePair("password", password));
                         request.setEntity(new UrlEncodedFormEntity(postParameters, "UTF-8"));
 
                         try (CloseableHttpResponse response = client.execute(request)) {
