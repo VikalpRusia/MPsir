@@ -4,7 +4,6 @@ import model.AdminMail;
 import model.Database;
 import model.NonAdminMail;
 import model.SetUpPDF;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,7 +23,7 @@ public class ForgotPasswordController {
     private final NonAdminMail nonAdminMail;
     private final SetUpPDF setUpPDF;
 
-    @Autowired public ForgotPasswordController(Database database, AdminMail adminMail, SetUpPDF setUpPDF, NonAdminMail nonAdminMail) {
+    public ForgotPasswordController(Database database, AdminMail adminMail, SetUpPDF setUpPDF, NonAdminMail nonAdminMail) {
         this.database = database;
         this.adminMail = adminMail;
         this.setUpPDF = setUpPDF;
