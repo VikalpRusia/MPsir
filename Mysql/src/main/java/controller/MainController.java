@@ -439,6 +439,7 @@ public class MainController {
 
         MenuItem add_null = new MenuItem("Update to null");
         add_null.setOnAction(z -> {
+            @SuppressWarnings("unchecked")
             TablePosition<ObservableList<Object>, String> sample = dataView.getFocusModel().getFocusedCell();
 //            System.out.println(tableColumnName.get(sample.getTableColumn()));
             updateToNull(tableColumnName.get(sample.getTableColumn()));
@@ -1167,6 +1168,7 @@ public class MainController {
     }
 
     private void changeColumnName(Event e) {
+        @SuppressWarnings("all")//needs to be more precise
         Label toBeRenamed = tableColumnLabel.get(((TableColumnHeader) e.getTarget()).getTableColumn());
         String tableName = tableView.getSelectionModel().getSelectedItem();
         TextInputDialog textInputDialog = new TextInputDialog();
