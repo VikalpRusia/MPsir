@@ -47,7 +47,7 @@ public class AboutController {
     public void about() {
         textFlow.getChildren().clear();
 
-        Text text = new Text("This is project is architected,designed and implemented by ");
+        Text text = new Text("This project is architected,designed and implemented by ");
         text.fontProperty().bind(heading);
 
         Text author = new Text("Vikalp Rusia");
