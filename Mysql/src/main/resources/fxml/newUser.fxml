@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<DialogPane fx:id="dialogPane" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.NewUserController">
+    <content>
+        <VBox spacing="5.0">
+            <Label text="User Name :" />
+            <TextField>
+                <VBox.margin>
+                    <Insets left="25.0" />
+                </VBox.margin>
+            </TextField>
+            <Label text="Password :" />
+            <TextField>
+                <VBox.margin>
+                    <Insets left="25.0" />
+                </VBox.margin>
+            </TextField>
+         <padding>
+            <Insets left="20.0" right="20.0" bottom="10"/>
+         </padding>
+        </VBox>
+    </content>
+</DialogPane>

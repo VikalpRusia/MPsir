@@ -594,6 +594,14 @@ public class Database implements AutoCloseable {
         }
     }
 
+    public int createUser(String userName) throws SQLException {
+        StringBuilder sb = new StringBuilder("CREATE USER ")
+                .append(userName);
+        try(Statement cursor = conn.createStatement()){
+            return cursor.executeUpdate(sb.toString());
+        }
+    }
+
     public static class Column {
         ObservableList<String> heading;
         ObservableList<ObservableList<Object>> column;

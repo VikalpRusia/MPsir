@@ -720,4 +720,21 @@ public class Services {
             };
         }
     }
+    public static class CreateUser extends Service<Integer>{
+        private String newUser;
+
+        public void setNewUser(String newUser) {
+            this.newUser = newUser;
+        }
+
+        @Override
+        protected Task<Integer> createTask() {
+            return new Task<>() {
+                @Override
+                protected Integer call() throws Exception {
+                    return database.createUser(newUser);
+                }
+            };
+        }
+    }
 }

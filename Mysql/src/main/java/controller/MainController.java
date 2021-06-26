@@ -33,9 +33,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Callback;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 import logger.ProjectLogger;
 import model.Database;
+import org.controlsfx.control.Notifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +98,7 @@ public class MainController {
     Services.AddColumn addColumn;
     Services.GetColumnAutoIncrement getIncrementColumn;
     Services.DeleteColumn deleteColumn;
+    Services.CreateUser createUser;
 
     Map<TableColumn<ObservableList<Object>, String>, String> tableColumnName;
     Map<String, TableColumn<ObservableList<Object>, String>> nameTableColumn;
@@ -318,6 +321,21 @@ public class MainController {
         deleteColumn = new Services.DeleteColumn();
         deleteColumn.setOnFailed(workerStateEvent ->
                 alertShow(deleteColumn.getException()));
+
+        //createUser
+        createUser = new Services.CreateUser();
+        createUser.setOnFailed(workerStateEvent ->
+                alertShow(createUser.getException()));
+        createUser.setOnSucceeded(workerStateEvent -> {
+            Notifications notificationBuilder = Notifications.create()
+                    .title("User Created")
+                    .text("New User Successfully Created")
+                    .hideAfter(Duration.seconds(5))
+                    .position(Pos.BOTTOM_RIGHT)
+                    .darkStyle();
+            notificationBuilder.show();
+
+        });
 
         //columnRelated
         columnDetailsProvider = new Services.ColumnDetailsProvider();
@@ -623,19 +641,16 @@ public class MainController {
         error.setHeaderText("error !");
         error.setContentText(e.getMessage());
         error.showAndWait();
+        logger.atError().log("An Exception",e);
+        e.printStackTrace();
     }
 
     public void addDatabase() {
         ObservableList<String> databaseList = databaseView.getItems();
-        TextInputDialog textInputDialog = new TextInputDialog();
+        TextInputDialog textInputDialog = textInputDialog();
         textInputDialog.setTitle("Database Name");
         textInputDialog.setHeaderText("Enter database Name: ");
         textInputDialog.setContentText("database cannot be empty");
-        textInputDialog.initOwner(databaseView.getScene().getWindow());
-        Node buttonOK = textInputDialog.getDialogPane().lookupButton(ButtonType.OK);
-        buttonOK.setDisable(true);
-        textInputDialog.getEditor().textProperty().addListener((observableValue, s, t1) ->
-                buttonOK.setDisable(t1.trim().isEmpty()));
         textInputDialog.getEditor().setPromptText("Database Name");
         Optional<String> result = textInputDialog.showAndWait();
         if (result.isPresent() && !result.get().equals("")) {
@@ -1171,9 +1186,9 @@ public class MainController {
         @SuppressWarnings("all")//needs to be more precise
         Label toBeRenamed = tableColumnLabel.get(((TableColumnHeader) e.getTarget()).getTableColumn());
         String tableName = tableView.getSelectionModel().getSelectedItem();
-        TextInputDialog textInputDialog = new TextInputDialog();
-        textInputDialog.setHeaderText("Changing Column Name ");
-        textInputDialog.setContentText("Enter new Column Name for " + toBeRenamed.getText());
+        TextInputDialog textInputDialog = textInputDialog();
+        textInputDialog.setTitle("Changing Column Name ");
+        textInputDialog.setHeaderText("Enter new Column Name for " + toBeRenamed.getText()+" !");
         Optional<String> result = textInputDialog.showAndWait();
         if (result.isPresent() && !result.get().isEmpty()) {
             changeColumnNameProvider.setTableName(tableName);
@@ -1357,5 +1372,29 @@ public class MainController {
             });
             startService(primaryKeyProvider);
         });
+    }
+
+    public void createUser() {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                "/fxml/newUser.fxml"));
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.initOwner(dataView.getScene().getWindow());
+        dialog.setTitle("Create New User");
+        try{
+            dialog.setDialogPane(loader.load());
+            dialog.showAndWait();
+        } catch (IOException e){
+            alertShow(e);
+        }
+    }
+
+    private TextInputDialog textInputDialog() {
+        TextInputDialog textInputDialog = new TextInputDialog();
+        textInputDialog.initOwner(databaseView.getScene().getWindow());
+        Node buttonOK = textInputDialog.getDialogPane().lookupButton(ButtonType.OK);
+        buttonOK.setDisable(true);
+        textInputDialog.getEditor().textProperty().addListener((observableValue, s, t1) ->
+                buttonOK.setDisable(t1.trim().isEmpty()));
+        return textInputDialog;
     }
 }
