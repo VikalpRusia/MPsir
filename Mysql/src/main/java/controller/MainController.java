@@ -28,16 +28,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
+import javafx.stage.*;
 import javafx.util.Callback;
-import javafx.util.Duration;
 import javafx.util.StringConverter;
 import logger.ProjectLogger;
 import model.Database;
-import org.controlsfx.control.Notifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -98,7 +93,7 @@ public class MainController {
     Services.AddColumn addColumn;
     Services.GetColumnAutoIncrement getIncrementColumn;
     Services.DeleteColumn deleteColumn;
-    Services.CreateUser createUser;
+    Services.ShowUsers showUsers;
 
     Map<TableColumn<ObservableList<Object>, String>, String> tableColumnName;
     Map<String, TableColumn<ObservableList<Object>, String>> nameTableColumn;
@@ -111,6 +106,8 @@ public class MainController {
     ContextMenu contextMenuDataRow;
     ContextMenu contextMenuPrimary;
     ContextMenu contextMenuDataRowWithoutPrimary;
+
+    Window window;
     private Service<Database.Column> lastExecuted;
     @FXML
     private ListView<String> databaseView;
@@ -138,7 +135,21 @@ public class MainController {
         }
     }
 
+    public static void alertShow(Throwable e, Window window) {
+        logger.atWarn().addArgument(e).log("An unexpected event happened {}");
+        Alert error = new Alert(Alert.AlertType.ERROR);
+        error.initOwner(window);
+        error.setTitle("Query failed!");
+        error.setHeaderText("error !");
+        error.setContentText(e.getMessage());
+        error.showAndWait();
+        logger.atError().log("An Exception", e);
+        e.printStackTrace();
+    }
+
     public void initialize() {
+        Platform.runLater(() ->window = databaseView.getScene().getWindow());
+
         //fileChooser
         logger.atInfo().log("Initialization begin");
         logger.atTrace().log("Configuring FileChooser");
@@ -165,7 +176,7 @@ public class MainController {
         logger.atTrace().log("Configuring Database List provider ");
         databaseListProvider = new Services.DatabaseListProvider();
         databaseListProvider.setOnFailed(workerStateEvent ->
-                alertShow(databaseListProvider.getException()));
+                alertShow(databaseListProvider.getException(), window));
 
         databaseView.itemsProperty().bind(databaseListProvider.valueProperty());
         logger.atTrace().log("Bound database List item property to database Provider value Property");
@@ -179,7 +190,7 @@ public class MainController {
         logger.atTrace().log("Configuring Table List Provider");
         tableListProvider = new Services.TableListProvider();
         tableListProvider.setOnFailed(workerStateEvent ->
-                alertShow(tableListProvider.getException()));
+                alertShow(tableListProvider.getException(), window));
 
         tableView.itemsProperty().bind(tableListProvider.valueProperty());
         logger.atTrace().log("Table View item property bound to Table List Provider value Property");
@@ -193,84 +204,84 @@ public class MainController {
         logger.atTrace().log("Configuring Primary Key Provider");
         primaryKeyProvider = new Services.PrimaryKeyService();
         primaryKeyProvider.setOnFailed(workerStateEvent ->
-                alertShow(primaryKeyProvider.getException()));
+                alertShow(primaryKeyProvider.getException(), window));
         logger.atDebug().log("Configured Primary Key provider");
 
         //UniqueKey
         logger.atTrace().log("Configuring Unique Key Provider");
         uniqueKeyProvider = new Services.UniqueKeyService();
         uniqueKeyProvider.setOnFailed(workerStateEvent ->
-                alertShow(uniqueKeyProvider.getException()));
+                alertShow(uniqueKeyProvider.getException(), window));
         logger.atDebug().log("Configured Unique Key Provider");
 
         //ForeignKey
         logger.atTrace().log("Configuring Foreign Key Provider");
         foreignKeyProvider = new Services.ForeignKeyService();
         foreignKeyProvider.setOnFailed(workerStateEvent ->
-                alertShow(foreignKeyProvider.getException()));
+                alertShow(foreignKeyProvider.getException(), window));
         logger.atDebug().log("Configured Foreign key Provider");
 
         //DeleteDatabase
         logger.atTrace().log("Configuring Delete Database Provider");
         deleteDatabaseProvider = new Services.DeleteDatabaseService();
         deleteDatabaseProvider.setOnFailed(workerStateEvent ->
-                alertShow(deleteDatabaseProvider.getException()));
+                alertShow(deleteDatabaseProvider.getException(), window));
         logger.atDebug().log("Configured Delete Database Provider");
 
         //DeleteTable
         logger.atTrace().log("Configuring Delete Table Provider");
         deleteTableProvider = new Services.DeleteTableService();
         deleteTableProvider.setOnFailed(workerStateEvent ->
-                alertShow(deleteTableProvider.getException()));
+                alertShow(deleteTableProvider.getException(), window));
         logger.atDebug().log("Configured Delete Table Provider");
 
         //createDatabase
         logger.atTrace().log("Configuring Create Database Provider");
         createDatabase = new Services.AddDatabase();
         createDatabase.setOnFailed(workerStateEvent ->
-                alertShow(createDatabase.getException()));
+                alertShow(createDatabase.getException(), window));
         logger.atDebug().log("Configured Create Database Provider");
 
         //createTable
         logger.atTrace().log("Configuring Create Table Provider");
         createTable = new Services.CreateTable();
         createTable.setOnFailed(workerStateEvent ->
-                alertShow(createTable.getException()));
+                alertShow(createTable.getException(), window));
         logger.atDebug().log("Configured Create Table Provider");
 
         //insertDataIntoTable
         logger.atTrace().log("Configuring Insertion into Table Provider");
         insertIntoTable = new Services.InsertData();
         insertIntoTable.setOnFailed(workerStateEvent ->
-                alertShow(insertIntoTable.getException()));
+                alertShow(insertIntoTable.getException(), window));
         logger.atDebug().log("Configured Insertion into Table Provider");
 
         //deleteData
         logger.atTrace().log("Configuring Delete data from Table Provider");
         deleteData = new Services.DeleteData();
         deleteData.setOnFailed(workerStateEvent ->
-                alertShow(deleteData.getException()));
+                alertShow(deleteData.getException(), window));
         logger.atDebug().log("Configured Delete data from Table Provider");
 
         //updateData
         logger.atTrace().log("Configuring Update Data in Table Provider");
         updateData = new Services.UpdateData();
         updateData.setOnFailed(workerStateEvent ->
-                alertShow(updateData.getException()));
+                alertShow(updateData.getException(), window));
         logger.atDebug().log("Configured Update Data in Table Provider");
 
         //descAll
         logger.atTrace().log("Configuring Description Table Provider");
         descAll = new Services.DescAll();
         descAll.setOnFailed(workerStateEvent ->
-                alertShow(descAll.getException()));
+                alertShow(descAll.getException(), window));
         logger.atDebug().log("Configured Description Table Provider");
 
         //primaryKeyValueProvider
         logger.atTrace().log("Configuring Update Data in Table Provider");
         primaryKeyValueProvider = new Services.PrimaryKeyValueProvider();
         primaryKeyValueProvider.setOnFailed(workerStateEvent ->
-                alertShow(primaryKeyValueProvider.getException()));
+                alertShow(primaryKeyValueProvider.getException(), window));
         logger.atDebug().log("Configured Delete data from Table Provider");
 
         //whereQuery
@@ -286,57 +297,46 @@ public class MainController {
         //changeTableName
         changeTableName = new Services.ChangeTableName();
         changeTableName.setOnFailed(workerStateEvent ->
-                alertShow(changeTableName.getException()));
+                alertShow(changeTableName.getException(), window));
         logger.atDebug().log("Configured change Table Name Service");
 
         //backupDb
         backupDB = new Services.BackupDB();
         backupDB.setOnFailed(workerStateEvent ->
-                alertShow(backupDB.getException()));
+                alertShow(backupDB.getException(), window));
         logger.atDebug().log("Configured Backup Database Service");
 
         //loadDB
         loadDB = new Services.LoadSavedDB();
         loadDB.setOnFailed(workerStateEvent ->
-                alertShow(loadDB.getException()));
+                alertShow(loadDB.getException(), window));
         logger.atDebug().log("Configured change Table Name Service");
 
         //changeColumnName
         changeColumnNameProvider = new Services.ChangeTableColumnName();
         changeColumnNameProvider.setOnFailed(workerStateEvent ->
-                alertShow(changeColumnNameProvider.getException()));
+                alertShow(changeColumnNameProvider.getException(), window));
         logger.atDebug().log("Configured ChangeColumnName");
 
         //addColumn
         addColumn = new Services.AddColumn();
         addColumn.setOnFailed(workerStateEvent ->
-                alertShow(addColumn.getException()));
+                alertShow(addColumn.getException(), window));
 
         //IncrementColumn
         getIncrementColumn = new Services.GetColumnAutoIncrement();
         getIncrementColumn.setOnFailed(workerStateEvent ->
-                alertShow(getIncrementColumn.getException()));
+                alertShow(getIncrementColumn.getException(), window));
 
         //deleteData
         deleteColumn = new Services.DeleteColumn();
         deleteColumn.setOnFailed(workerStateEvent ->
-                alertShow(deleteColumn.getException()));
+                alertShow(deleteColumn.getException(), window));
 
-        //createUser
-        createUser = new Services.CreateUser();
-        createUser.setOnFailed(workerStateEvent ->
-                alertShow(createUser.getException()));
-        createUser.setOnSucceeded(workerStateEvent -> {
-            Notifications notificationBuilder = Notifications.create()
-                    .title("User Created")
-                    .text("'" + createUser.getNewUserDetails().getKey() + "' Successfully Created having password '"
-                            + createUser.getNewUserDetails().getValue() + "'")
-                    .hideAfter(Duration.seconds(5))
-                    .position(Pos.BOTTOM_RIGHT)
-                    .darkStyle();
-            notificationBuilder.show();
-
-        });
+        //showUsers
+        showUsers = new Services.ShowUsers();
+        showUsers.setOnFailed(workerStateEvent ->
+                alertShow(showUsers.getException(), window));
 
         //columnRelated
         columnDetailsProvider = new Services.ColumnDetailsProvider();
@@ -532,13 +532,13 @@ public class MainController {
                     try {
                         Services.rollback();
                     } catch (Exception e) {
-                        alertShow(e);
+                        alertShow(e, window);
                     }
                 } else {
                     try {
                         Services.commit();
                     } catch (Exception e) {
-                        alertShow(e);
+                        alertShow(e, window);
                     }
                 }
             }
@@ -632,18 +632,6 @@ public class MainController {
             consumer.accept(selection, listView);
             logger.atInfo().addArgument(selection).log("Deleted Successfully {}");
         }
-    }
-
-    public void alertShow(Throwable e) {
-        logger.atWarn().addArgument(e).log("An unexpected event happened {}");
-        Alert error = new Alert(Alert.AlertType.ERROR);
-        error.initOwner(databaseView.getScene().getWindow());
-        error.setTitle("Query failed!");
-        error.setHeaderText("error !");
-        error.setContentText(e.getMessage());
-        error.showAndWait();
-        logger.atError().log("An Exception", e);
-        e.printStackTrace();
     }
 
     public void addDatabase() {
@@ -764,7 +752,7 @@ public class MainController {
         try {
             dialog.setDialogPane(fxmlLoader.load());
         } catch (IOException e) {
-            alertShow(e);
+            alertShow(e, window);
             return;
         }
         DataAddRowController controller = fxmlLoader.getController();
@@ -882,7 +870,7 @@ public class MainController {
             stage.setScene(new Scene(root));
             stage.showAndWait();
         } catch (IOException e) {
-            alertShow(e);
+            alertShow(e, window);
         }
 
     }
@@ -908,7 +896,7 @@ public class MainController {
             descAll.setTableName(tableName);
             startService(descAll);
         } catch (IOException e) {
-            alertShow(e);
+            alertShow(e, window);
         }
 
 
@@ -981,7 +969,7 @@ public class MainController {
                 descriptionTable();
             }
         } catch (IOException exception) {
-            alertShow(exception);
+            alertShow(exception, window);
         }
     }
 
@@ -1219,7 +1207,7 @@ public class MainController {
                     result.get().getButtonData() == ButtonBar.ButtonData.OK_DONE) {
                 if (controller.getColumnName().isEmpty() || controller.getColumnType() == null ||
                         controller.getColumnType().isEmpty()) {
-                    alertShow(new Exception("All fields are necessary"));
+                    alertShow(new Exception("All fields are necessary"), window);
                     return;
                 }
                 addColumn.setTableName(tableName);
@@ -1281,7 +1269,7 @@ public class MainController {
                 startService(addColumn);
             }
         } catch (IOException exception) {
-            alertShow(exception);
+            alertShow(exception, window);
         }
     }
 
@@ -1309,7 +1297,7 @@ public class MainController {
         try {
             Services.setAutoCommit(autoCommit.isSelected());
         } catch (Exception e) {
-            alertShow(e);
+            alertShow(e, window);
         }
     }
 
@@ -1350,7 +1338,7 @@ public class MainController {
 
     private void dataQueryProvider(Service<Database.Column> queryProvider) {
         queryProvider.setOnFailed(workerStateEvent ->
-                alertShow(queryProvider.getException()));
+                alertShow(queryProvider.getException(), window));
 
         queryProvider.setOnSucceeded(workerStateEvent -> {
             lastExecuted = queryProvider;
@@ -1375,23 +1363,25 @@ public class MainController {
         });
     }
 
-    public void createUser() {
+    public void showUsers() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(
-                "/fxml/newUser.fxml"));
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.initOwner(dataView.getScene().getWindow());
-        dialog.setTitle("Creating New User");
+                "/fxml/showUsers.fxml"));
+        Stage stage = new Stage(StageStyle.UNIFIED);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initOwner(databaseView.getScene().getWindow());
         try {
-            dialog.setDialogPane(loader.load());
-            NewUserController newUserController = loader.getController();
-            Optional<ButtonType> response = dialog.showAndWait();
-            if (response.isPresent() && response.get().getButtonData().equals(ButtonBar.ButtonData.OK_DONE)) {
-                createUser.setNewUserDetails(newUserController.getUserDetail());
-                startService(createUser);
-            }
+            stage.setScene(new Scene(loader.load()));
+            ShowUsers showUsersController = loader.getController();
+            showUsers.setOnSucceeded(workerStateEvent -> {
+                showUsersController.setUsers(showUsers.getValue());
+                stage.showAndWait();
+            });
+            startService(showUsers);
+
         } catch (IOException e) {
-            alertShow(e);
+            alertShow(e, window);
         }
+
     }
 
     private TextInputDialog textInputDialog() {

@@ -8,8 +8,7 @@
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <Menu text="_File">
-                <MenuItem mnemonicParsing="false" text="Create user" onAction="#createUser"/>
-                <MenuItem mnemonicParsing="false" text="Drop user"/>
+                <MenuItem mnemonicParsing="false" text="Show users" onAction="#showUsers"/>
                 <MenuItem mnemonicParsing="false" onAction="#refresh" text="Refresh MySql"/>
                 <CheckMenuItem fx:id="autoCommit" mnemonicParsing="false" text="AutoCommit" selected="true"
                                onAction="#changeAutoCommit"/>

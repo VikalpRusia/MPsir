@@ -602,10 +602,22 @@ public class Database implements AutoCloseable {
                 .append("'@'localhost' IDENTIFIED BY '")
                 .append(userDetails.getValue())
                 .append("'");
-        logger.atInfo().log("Query executed: ",sb);
+        logger.atInfo().log("Query executed: ", sb);
         try (Statement cursor = conn.createStatement()) {
             return cursor.executeUpdate(sb.toString());
         }
+    }
+
+    public ObservableList<String> showUsers() throws SQLException {
+        ObservableList<String> strings = FXCollections.observableArrayList();
+        try (Statement cursor = conn.createStatement();
+             ResultSet resultSet = cursor.executeQuery("SELECT user FROM mysql.user")
+        ) {
+            while (resultSet.next()){
+                strings.add(resultSet.getString(1));
+            }
+        }
+        return strings;
     }
 
     public static class Column {

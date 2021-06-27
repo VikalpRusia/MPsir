@@ -742,4 +742,16 @@ public class Services {
             };
         }
     }
+
+    public static class ShowUsers extends Service<ObservableList<String>>{
+        @Override
+        protected Task<ObservableList<String>> createTask() {
+            return new Task<>() {
+                @Override
+                protected ObservableList<String> call() throws Exception {
+                    return database.showUsers();
+                }
+            };
+        }
+    }
 }
