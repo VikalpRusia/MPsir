@@ -17,15 +17,16 @@ import java.util.Optional;
 
 public class ShowUsers {
     @FXML
-    private TableColumn<String,String> users;
+    private TableColumn<String, String> users;
     @FXML
     private TableView<String> tableView;
 
     private Services.CreateUser createUser;
+    private Services.DropUser dropUser;
     private Window window;
 
-    public void initialize(){
-        Platform.runLater(() ->window = tableView.getScene().getWindow());
+    public void initialize() {
+        Platform.runLater(() -> window = tableView.getScene().getWindow());
 
         //createUser
         createUser = new Services.CreateUser();
@@ -40,6 +41,23 @@ public class ShowUsers {
                     .position(Pos.BOTTOM_RIGHT)
                     .darkStyle();
             notificationBuilder.show();
+            tableView.getItems().add(createUser.getNewUserDetails().getValue());
+
+        });
+
+        //dropUser
+        dropUser = new Services.DropUser();
+        dropUser.setOnFailed(workerStateEvent ->
+                MainController.alertShow(dropUser.getException(), window));
+        dropUser.setOnSucceeded(workerStateEvent -> {
+            Notifications notificationBuilder = Notifications.create()
+                    .title("User Dropped")
+                    .text("'" + dropUser.getUser_toBe_dropped() + "' Successfully Dropped")
+                    .hideAfter(Duration.seconds(5))
+                    .position(Pos.BOTTOM_RIGHT)
+                    .darkStyle();
+            notificationBuilder.show();
+            tableView.getItems().remove(tableView.getSelectionModel().getSelectedIndex());
 
         });
     }
@@ -51,9 +69,10 @@ public class ShowUsers {
                 new SimpleStringProperty(stringStringCellDataFeatures.getValue()));
 
         MenuItem dropUser = new MenuItem("Drop User");
+        dropUser.setOnAction(e -> dropUser());
         MenuItem addUser = new MenuItem("Add User");
         addUser.setOnAction(e -> createUser());
-        ContextMenu contextMenu = new ContextMenu(addUser,dropUser);
+        ContextMenu contextMenu = new ContextMenu(addUser, dropUser);
 
         tableView.setContextMenu(contextMenu);
     }
@@ -73,12 +92,14 @@ public class ShowUsers {
                 MainController.startService(createUser);
             }
         } catch (IOException e) {
-            MainController.alertShow(e,window);
+            MainController.alertShow(e, window);
         }
     }
 
-    public void dropUser(){
-
+    public void dropUser() {
+        String user_to_drop = tableView.getSelectionModel().getSelectedItem();
+        dropUser.setUser_toBe_dropped(user_to_drop);
+        MainController.startService(dropUser);
     }
 
 }

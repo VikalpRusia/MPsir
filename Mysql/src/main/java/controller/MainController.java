@@ -148,7 +148,7 @@ public class MainController {
     }
 
     public void initialize() {
-        Platform.runLater(() ->window = databaseView.getScene().getWindow());
+        Platform.runLater(() -> window = databaseView.getScene().getWindow());
 
         //fileChooser
         logger.atInfo().log("Initialization begin");
@@ -1367,6 +1367,8 @@ public class MainController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(
                 "/fxml/showUsers.fxml"));
         Stage stage = new Stage(StageStyle.UNIFIED);
+        stage.getIcons().add(new Image(ImagesLink.icon));
+        stage.setTitle("All Users");
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.initOwner(databaseView.getScene().getWindow());
         try {

@@ -721,15 +721,16 @@ public class Services {
             };
         }
     }
-    public static class CreateUser extends Service<Integer>{
-        private Pair<String,String> newUserDetails;
 
-        public void setNewUserDetails(Pair<String,String> newUserDetails) {
-            this.newUserDetails = newUserDetails;
-        }
+    public static class CreateUser extends Service<Integer> {
+        private Pair<String, String> newUserDetails;
 
         public Pair<String, String> getNewUserDetails() {
             return newUserDetails;
+        }
+
+        public void setNewUserDetails(Pair<String, String> newUserDetails) {
+            this.newUserDetails = newUserDetails;
         }
 
         @Override
@@ -743,13 +744,35 @@ public class Services {
         }
     }
 
-    public static class ShowUsers extends Service<ObservableList<String>>{
+    public static class ShowUsers extends Service<ObservableList<String>> {
         @Override
         protected Task<ObservableList<String>> createTask() {
             return new Task<>() {
                 @Override
                 protected ObservableList<String> call() throws Exception {
                     return database.showUsers();
+                }
+            };
+        }
+    }
+
+    public static class DropUser extends Service<Integer> {
+        private String user_toBe_dropped;
+
+        public String getUser_toBe_dropped() {
+            return user_toBe_dropped;
+        }
+
+        public void setUser_toBe_dropped(String user_toBe_dropped) {
+            this.user_toBe_dropped = user_toBe_dropped;
+        }
+
+        @Override
+        protected Task<Integer> createTask() {
+            return new Task<>() {
+                @Override
+                protected Integer call() throws Exception {
+                    return database.dropUser(user_toBe_dropped);
                 }
             };
         }

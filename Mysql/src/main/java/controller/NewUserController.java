@@ -43,8 +43,8 @@ public class NewUserController {
         loginButton.setDisable(userName.getText().trim().isEmpty() || password.getText().isEmpty());
     }
 
-    public Pair<String,String> getUserDetail(){
-        return new Pair<>(userName.getText(),password.getText());
+    public Pair<String, String> getUserDetail() {
+        return new Pair<>(userName.getText(), password.getText());
     }
 
 }

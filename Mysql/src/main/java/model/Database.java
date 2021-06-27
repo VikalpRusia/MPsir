@@ -613,11 +613,21 @@ public class Database implements AutoCloseable {
         try (Statement cursor = conn.createStatement();
              ResultSet resultSet = cursor.executeQuery("SELECT user FROM mysql.user")
         ) {
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 strings.add(resultSet.getString(1));
             }
         }
         return strings;
+    }
+
+    public int dropUser(String userName) throws SQLException {
+        //drop user 'vikalp'@'localhost'
+        StringBuilder sb = new StringBuilder("DROP USER '")
+                .append(userName)
+                .append("'@'localhost'");
+        try (Statement cursor = conn.createStatement()) {
+            return cursor.executeUpdate(sb.toString());
+        }
     }
 
     public static class Column {
