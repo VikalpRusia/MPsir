@@ -329,7 +329,8 @@ public class MainController {
         createUser.setOnSucceeded(workerStateEvent -> {
             Notifications notificationBuilder = Notifications.create()
                     .title("User Created")
-                    .text("New User Successfully Created")
+                    .text("'" + createUser.getNewUserDetails().getKey() + "' Successfully Created having password '"
+                            + createUser.getNewUserDetails().getValue() + "'")
                     .hideAfter(Duration.seconds(5))
                     .position(Pos.BOTTOM_RIGHT)
                     .darkStyle();
@@ -641,7 +642,7 @@ public class MainController {
         error.setHeaderText("error !");
         error.setContentText(e.getMessage());
         error.showAndWait();
-        logger.atError().log("An Exception",e);
+        logger.atError().log("An Exception", e);
         e.printStackTrace();
     }
 
@@ -1188,7 +1189,7 @@ public class MainController {
         String tableName = tableView.getSelectionModel().getSelectedItem();
         TextInputDialog textInputDialog = textInputDialog();
         textInputDialog.setTitle("Changing Column Name ");
-        textInputDialog.setHeaderText("Enter new Column Name for " + toBeRenamed.getText()+" !");
+        textInputDialog.setHeaderText("Enter new Column Name for " + toBeRenamed.getText() + " !");
         Optional<String> result = textInputDialog.showAndWait();
         if (result.isPresent() && !result.get().isEmpty()) {
             changeColumnNameProvider.setTableName(tableName);
@@ -1379,11 +1380,16 @@ public class MainController {
                 "/fxml/newUser.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.initOwner(dataView.getScene().getWindow());
-        dialog.setTitle("Create New User");
-        try{
+        dialog.setTitle("Creating New User");
+        try {
             dialog.setDialogPane(loader.load());
-            dialog.showAndWait();
-        } catch (IOException e){
+            NewUserController newUserController = loader.getController();
+            Optional<ButtonType> response = dialog.showAndWait();
+            if (response.isPresent() && response.get().getButtonData().equals(ButtonBar.ButtonData.OK_DONE)) {
+                createUser.setNewUserDetails(newUserController.getUserDetail());
+                startService(createUser);
+            }
+        } catch (IOException e) {
             alertShow(e);
         }
     }

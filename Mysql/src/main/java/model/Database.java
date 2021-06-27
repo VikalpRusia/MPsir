@@ -3,6 +3,7 @@ package model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ProgressBar;
+import javafx.util.Pair;
 import logger.ProjectLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,7 +174,7 @@ public class Database implements AutoCloseable {
                 }
             }
             s.append(")");
-            System.out.println(s.toString());
+            System.out.println(s);
             logger.atDebug().log("SQL Query: {}", s);
             return cursor.executeUpdate(s.toString());
         }
@@ -405,7 +406,7 @@ public class Database implements AutoCloseable {
         sb.append(tableName)
                 .append(" WHERE ")
                 .append(whereClause);
-        System.out.println(sb.toString());
+        System.out.println(sb);
         logger.atDebug().log("SQL Query: {}", sb);
         try (Statement statement = conn.createStatement()) {
             Column columns = new Column();
@@ -470,7 +471,7 @@ public class Database implements AutoCloseable {
         if (autoIncrement) {
             sb.append(" AUTO_INCREMENT");
         }
-        System.out.println(sb.toString());
+        System.out.println(sb);
         try (Statement statement = conn.createStatement()) {
             return statement.executeUpdate(sb.toString());
         }
@@ -487,7 +488,7 @@ public class Database implements AutoCloseable {
                 .append(databaseName)
                 .append(" -r ")
                 .append(toBeSavedAt);
-        System.out.println(sb.toString());
+        System.out.println(sb);
         logger.atDebug().log("Starting PowerShell and executing command = {}", sb);
         ProcessBuilder builder = new ProcessBuilder(
                 "powershell.exe", sb.toString()
@@ -525,7 +526,7 @@ public class Database implements AutoCloseable {
                 .append(" ")
                 .append(databaseName);
 
-        System.out.println(sb.toString());
+        System.out.println(sb);
         logger.atDebug().log("Starting PowerShell and executing command = {}", sb);
 
         ProcessBuilder builder = new ProcessBuilder(
@@ -555,7 +556,7 @@ public class Database implements AutoCloseable {
                 .append(oldColumnName)
                 .append(" TO ")
                 .append(newColumnName);
-        System.out.println(sb.toString());
+        System.out.println(sb);
         try (Statement cursor = conn.createStatement()) {
             return cursor.executeUpdate(sb.toString());
         }
@@ -571,7 +572,7 @@ public class Database implements AutoCloseable {
                 .append(tableName)
                 .append("'")
                 .append(" AND EXTRA like '%auto_increment%'");
-        System.out.println(sb.toString());
+        System.out.println(sb);
         try (Statement cursor = conn.createStatement()) {
             ResultSet resultSet = cursor.executeQuery(sb.toString());
             if (resultSet.next()) {
@@ -588,16 +589,21 @@ public class Database implements AutoCloseable {
         sb.append(tableName)
                 .append(" DROP COLUMN ")
                 .append(columnName);
-        System.out.println(sb.toString());
+        System.out.println(sb);
         try (Statement cursor = conn.createStatement()) {
             return cursor.executeUpdate(sb.toString());
         }
     }
 
-    public int createUser(String userName) throws SQLException {
-        StringBuilder sb = new StringBuilder("CREATE USER ")
-                .append(userName);
-        try(Statement cursor = conn.createStatement()){
+    public int createUser(Pair<String, String> userDetails) throws SQLException {
+        //create user 'sample'@'localhost' identified by 'sample';
+        StringBuilder sb = new StringBuilder("CREATE USER '")
+                .append(userDetails.getKey())
+                .append("'@'localhost' IDENTIFIED BY '")
+                .append(userDetails.getValue())
+                .append("'");
+        logger.atInfo().log("Query executed: ",sb);
+        try (Statement cursor = conn.createStatement()) {
             return cursor.executeUpdate(sb.toString());
         }
     }

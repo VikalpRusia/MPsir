@@ -5,6 +5,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
+import javafx.util.Pair;
 import model.Database;
 
 import java.io.File;
@@ -721,10 +722,14 @@ public class Services {
         }
     }
     public static class CreateUser extends Service<Integer>{
-        private String newUser;
+        private Pair<String,String> newUserDetails;
 
-        public void setNewUser(String newUser) {
-            this.newUser = newUser;
+        public void setNewUserDetails(Pair<String,String> newUserDetails) {
+            this.newUserDetails = newUserDetails;
+        }
+
+        public Pair<String, String> getNewUserDetails() {
+            return newUserDetails;
         }
 
         @Override
@@ -732,7 +737,7 @@ public class Services {
             return new Task<>() {
                 @Override
                 protected Integer call() throws Exception {
-                    return database.createUser(newUser);
+                    return database.createUser(newUserDetails);
                 }
             };
         }
