@@ -8,6 +8,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Window;
 import javafx.util.Callback;
 import javafx.util.Duration;
@@ -65,11 +67,13 @@ public class ShowUsers {
         users.setCellValueFactory(stringStringCellDataFeatures ->
                 new SimpleStringProperty(stringStringCellDataFeatures.getValue()));
 
-        MenuItem dropUser = new MenuItem("Drop User");
-        dropUser.setOnAction(e -> dropUser());
         MenuItem addUser = new MenuItem("Add User");
         addUser.setOnAction(e -> createUser());
-        ContextMenu completeMenu = new ContextMenu(addUser, dropUser);
+        MenuItem grantPrivileges = new MenuItem("Grant Privileges");
+        grantPrivileges.setOnAction(e -> grantPrivileges());
+        MenuItem dropUser = new MenuItem("Drop User");
+        dropUser.setOnAction(e -> dropUser());
+        ContextMenu completeMenu = new ContextMenu(addUser, grantPrivileges, dropUser);
         addUser = new MenuItem("Add User");
         addUser.setOnAction(e -> createUser());
         ContextMenu incompleteMenu = new ContextMenu(addUser);
@@ -125,4 +129,13 @@ public class ShowUsers {
         MainController.startService(dropUser);
     }
 
+    public void grantPrivileges() {
+
+    }
+
+    public void checkKey(KeyEvent keyEvent) {
+        if (keyEvent.getCode().equals(KeyCode.ESCAPE)){
+            window.hide();
+        }
+    }
 }
