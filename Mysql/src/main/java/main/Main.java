@@ -60,6 +60,7 @@ public class Main extends Application {
         try {
             if (database != null) {
                 database.close();
+                database=null;
                 logger.atInfo().log("Closing database");
             }
         } catch (SQLException e) {
