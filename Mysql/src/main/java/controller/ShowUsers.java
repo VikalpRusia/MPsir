@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.stage.Window;
+import javafx.util.Callback;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 
@@ -60,11 +61,7 @@ public class ShowUsers {
             tableView.getItems().remove(tableView.getSelectionModel().getSelectedIndex());
 
         });
-    }
 
-
-    public void setUsers(ObservableList<String> strings) {
-        tableView.setItems(strings);
         users.setCellValueFactory(stringStringCellDataFeatures ->
                 new SimpleStringProperty(stringStringCellDataFeatures.getValue()));
 
@@ -72,9 +69,35 @@ public class ShowUsers {
         dropUser.setOnAction(e -> dropUser());
         MenuItem addUser = new MenuItem("Add User");
         addUser.setOnAction(e -> createUser());
-        ContextMenu contextMenu = new ContextMenu(addUser, dropUser);
+        ContextMenu completeMenu = new ContextMenu(addUser, dropUser);
+        addUser = new MenuItem("Add User");
+        addUser.setOnAction(e -> createUser());
+        ContextMenu incompleteMenu = new ContextMenu(addUser);
 
-        tableView.setContextMenu(contextMenu);
+        tableView.setContextMenu(completeMenu);
+        users.setCellFactory(new Callback<>() {
+            @Override
+            public TableCell<String, String> call(TableColumn<String, String> stringStringTableColumn) {
+                return new TableCell<>() {
+                    @Override
+                    public void updateItem(String s, boolean empty) {
+                        super.updateItem(s, empty);
+                        if (empty) {
+                            setText(null);
+                            setContextMenu(incompleteMenu);
+                        } else {
+                            setText(s);
+                            setContextMenu(completeMenu);
+                        }
+                    }
+                };
+            }
+        });
+    }
+
+
+    public void setUsers(ObservableList<String> strings) {
+        tableView.setItems(strings);
     }
 
     public void createUser() {
