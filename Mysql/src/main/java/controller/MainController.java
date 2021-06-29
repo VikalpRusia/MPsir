@@ -32,6 +32,7 @@ import javafx.stage.*;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import logger.ProjectLogger;
+import main.Main;
 import model.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1401,5 +1402,11 @@ public class MainController {
         backupDB.setDatabaseName(null);
         backupDB.setToBeSavedAt(file);
         startService(backupDB);
+    }
+
+    public void logOut() {
+        Main main = new Main();
+        Platform.runLater(()->
+                main.restart((Stage) window));
     }
 }

@@ -13,6 +13,7 @@
                 <CheckMenuItem fx:id="autoCommit" mnemonicParsing="false" text="AutoCommit" selected="true"
                                onAction="#changeAutoCommit"/>
                 <MenuItem mnemonicParsing="false" onAction="#saveMySql" text="Save MySql"/>
+                <MenuItem mnemonicParsing="false" onAction="#logOut" text="Log Out"/>
                 <MenuItem mnemonicParsing="false" onAction="#exit" text="Exit"/>
             </Menu>
             <Menu text="_Edit">

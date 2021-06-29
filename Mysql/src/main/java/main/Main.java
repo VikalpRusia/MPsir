@@ -26,15 +26,13 @@ import java.util.Optional;
 
 public class Main extends Application {
     private Database database;
-    private Logger logger;
+    private final Logger logger;
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    @Override
-    public void init() throws Exception {
-        super.init();
+    public Main() {
         System.setProperty("java.util.logging.config.file",
                 getClass().getResource("/logging.properties").getPath());
         logger = LoggerFactory.getLogger(ProjectLogger.class);
@@ -42,7 +40,15 @@ public class Main extends Application {
     }
 
     @Override
+    public void init() throws Exception {
+        super.init();
+        HostServicesProvider.INSTANCE.init(getHostServices());
+        logger.atTrace().log("Host Service initialise");
+    }
+
+    @Override
     public void start(Stage primaryStage) {
+        primaryStage.close();
         logger.atInfo().log("Starting Application");
         primaryStage.getIcons().add(new Image(ImagesLink.icon));
         logger.atTrace().addArgument(ImagesLink.icon).log("Icon loaded Successfully in main window {}");
@@ -72,12 +78,10 @@ public class Main extends Application {
             alert.showAndWait();
         }
         logger.atDebug().log("Application stopped");
-        System.exit(0);
     }
 
     public void login(Stage primaryStage) {
-        HostServicesProvider.INSTANCE.init(getHostServices());
-        logger.atTrace().log("Host Service initialise");
+
         logger.atInfo().log("Attempt login");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -137,5 +141,10 @@ public class Main extends Application {
             alert.showAndWait();
             stop();
         }
+    }
+
+    public void restart(Stage primaryStage){
+        stop();
+        start(primaryStage);
     }
 }
