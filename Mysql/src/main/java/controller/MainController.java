@@ -95,7 +95,6 @@ public class MainController {
     Services.GetColumnAutoIncrement getIncrementColumn;
     Services.DeleteColumn deleteColumn;
     Services.ShowUsers showUsers;
-
     Map<TableColumn<ObservableList<Object>, String>, String> tableColumnName;
     Map<String, TableColumn<ObservableList<Object>, String>> nameTableColumn;
     Map<TableColumn<ObservableList<Object>, String>, Label> tableColumnLabel;
@@ -107,8 +106,8 @@ public class MainController {
     ContextMenu contextMenuDataRow;
     ContextMenu contextMenuPrimary;
     ContextMenu contextMenuDataRowWithoutPrimary;
-
     Window window;
+    private Main main;
     private Service<Database.Column> lastExecuted;
     @FXML
     private ListView<String> databaseView;
@@ -124,6 +123,9 @@ public class MainController {
     private SuggestingTextField whereQuery;
     @FXML
     private CheckMenuItem autoCommit;
+    public void setMain(Main main) {
+        this.main = main;
+    }
 
     public static void startService(Service<?> service) {
         logger.atDebug().addArgument(service).log("Started Service {}");
@@ -1405,8 +1407,6 @@ public class MainController {
     }
 
     public void logOut() {
-        Main main = new Main();
-        Platform.runLater(()->
-                main.restart((Stage) window));
+        main.restart((Stage) window);
     }
 }

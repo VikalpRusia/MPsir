@@ -113,6 +113,7 @@ public class Main extends Application {
             primaryStage.setScene(new Scene(loader.load()));
             logger.atTrace().log("Loaded display fxml");
             MainController controller = loader.getController();
+            controller.setMain(this);
             controller.setDatabase(database);
             controller.initData();
             Screen screen = Screen.getPrimary();
