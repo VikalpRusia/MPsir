@@ -25,18 +25,18 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 public class Main extends Application {
-    private Database database;
     private final Logger logger;
-
-    public static void main(String[] args) {
-        launch(args);
-    }
+    private Database database;
 
     public Main() {
         System.setProperty("java.util.logging.config.file",
                 getClass().getResource("/logging.properties").getPath());
         logger = LoggerFactory.getLogger(ProjectLogger.class);
         logger.atTrace().log("Logger created ", logger);
+    }
+
+    public static void main(String[] args) {
+        launch(args);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class Main extends Application {
         try {
             if (database != null) {
                 database.close();
-                database=null;
+                database = null;
                 logger.atInfo().log("Closing database");
             }
         } catch (SQLException e) {
@@ -144,7 +144,7 @@ public class Main extends Application {
         }
     }
 
-    public void restart(Stage primaryStage){
+    public void restart(Stage primaryStage) {
         stop();
         start(primaryStage);
     }

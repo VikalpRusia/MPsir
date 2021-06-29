@@ -123,9 +123,6 @@ public class MainController {
     private SuggestingTextField whereQuery;
     @FXML
     private CheckMenuItem autoCommit;
-    public void setMain(Main main) {
-        this.main = main;
-    }
 
     public static void startService(Service<?> service) {
         logger.atDebug().addArgument(service).log("Started Service {}");
@@ -148,6 +145,10 @@ public class MainController {
         error.showAndWait();
         logger.atError().log("An Exception", e);
         e.printStackTrace();
+    }
+
+    public void setMain(Main main) {
+        this.main = main;
     }
 
     public void initialize() {
@@ -1401,9 +1402,11 @@ public class MainController {
 
     public void saveMySql() {
         File file = fileChooser.showSaveDialog(window);
-        backupDB.setDatabaseName(null);
-        backupDB.setToBeSavedAt(file);
-        startService(backupDB);
+        if (file != null) {
+            backupDB.setDatabaseName(null);
+            backupDB.setToBeSavedAt(file);
+            startService(backupDB);
+        }
     }
 
     public void logOut() {
