@@ -1135,13 +1135,13 @@ public class MainController {
     }
 
     public void loadSnapShotDB() {
-        File loadingFile = fileChooser.showOpenDialog(databaseView.getScene().getWindow());
+        File loadingFile = fileChooser.showOpenDialog(window);
         if (loadingFile != null) {
             initialFolder.set(loadingFile.getParentFile());
             loadDB.setToBeLoaded(loadingFile);
 
             TextInputDialog textInputDialog = new TextInputDialog();
-            textInputDialog.initOwner(databaseView.getScene().getWindow());
+            textInputDialog.initOwner(window);
             textInputDialog.setTitle("Database Name");
             textInputDialog.setHeaderText("Enter Database Name: ");
             textInputDialog.setContentText("Database name should be uncommon");
@@ -1394,5 +1394,12 @@ public class MainController {
         textInputDialog.getEditor().textProperty().addListener((observableValue, s, t1) ->
                 buttonOK.setDisable(t1.trim().isEmpty()));
         return textInputDialog;
+    }
+
+    public void saveMySql() {
+        File file = fileChooser.showSaveDialog(window);
+        backupDB.setDatabaseName(null);
+        backupDB.setToBeSavedAt(file);
+        startService(backupDB);
     }
 }

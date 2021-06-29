@@ -485,7 +485,7 @@ public class Database implements AutoCloseable {
                 .append(" -p")
                 .append(password)
                 .append(" ")
-                .append(databaseName)
+                .append(Objects.requireNonNullElse(databaseName, "--all-databases"))
                 .append(" -r ")
                 .append(toBeSavedAt);
         System.out.println(sb);
